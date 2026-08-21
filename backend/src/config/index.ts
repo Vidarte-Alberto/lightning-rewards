@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 const databaseUrl = process.env.DATABASE_URL;
+const jwtSecret = process.env.JWT_SECRET;
 
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is required');
@@ -12,11 +13,16 @@ const clinkTimeoutSeconds =
     ? configuredClinkTimeout
     : 30;
 
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET is required');
+}
+
 const config = {
   port: Number(process.env.PORT) || 3000,
   databaseUrl,
   clinkPrivateKey: process.env.CLINK_PRIVATE_KEY,
   clinkTimeoutSeconds,
+  jwtSecret,
 };
 
 export default config;

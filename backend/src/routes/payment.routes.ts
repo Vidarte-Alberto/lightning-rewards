@@ -1,6 +1,5 @@
 import { Router, type Request, type Response } from 'express';
 
-import { Role } from '../generated/prisma/client';
 import { purchaseInputFromRequest } from '../dtos';
 import { PaymentService, PaymentServiceError, type PurchaseResult } from '../services';
 
@@ -15,12 +14,12 @@ export const createPaymentRouter = (paymentService: PaymentService) => {
 
   router.post('/purchase', async (request: Request, response: Response) => {
     try {
-      if (!request.auth || request.auth.role !== Role.CUSTOMER) {
+      if (!request.user) {
         response.status(401).json({ error: { code: 'AUTH_REQUIRED', message: 'Autenticación requerida.' } });
         return;
       }
 
-      const input = purchaseInputFromRequest(request.body, request.auth.userId);
+      const input = purchaseInputFromRequest(request.body, request.user.id);
       const result = await paymentService.purchase(input);
 
       response.status(responseStatus(result)).json({
