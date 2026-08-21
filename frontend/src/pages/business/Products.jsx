@@ -61,7 +61,7 @@ function ProductForm({ initialValue = EMPTY_FORM, isSaving, onCancel, onSubmit, 
           maxLength="500"
           value={form.description}
           onChange={setField('description')}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none transition-colors focus:border-amber-500"
+          className="w-full rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-neutral-50 outline-none transition-colors focus:border-accent"
         />
       </div>
       <div>
@@ -70,7 +70,7 @@ function ProductForm({ initialValue = EMPTY_FORM, isSaving, onCancel, onSubmit, 
           id={`product-currency-${initialValue.id ?? 'new'}`}
           value={form.priceCurrency}
           onChange={setField('priceCurrency')}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none transition-colors focus:border-amber-500"
+          className="w-full rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-neutral-50 outline-none transition-colors focus:border-accent"
         >
           <option value="SATS">Sats</option>
           <option value="MXN">Mexican pesos (MXN)</option>
@@ -107,12 +107,12 @@ function ProductForm({ initialValue = EMPTY_FORM, isSaving, onCancel, onSubmit, 
         <button
           type="submit"
           disabled={isSaving}
-          className="rounded-lg bg-amber-500 px-5 py-2.5 font-semibold text-neutral-950 transition-colors hover:bg-amber-400 disabled:cursor-wait disabled:opacity-60"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {isSaving ? 'Saving…' : submitLabel}
         </button>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="rounded-lg border border-neutral-700 px-5 py-2.5 font-medium text-white hover:border-neutral-500">
+          <button type="button" onClick={onCancel} className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/16 bg-white/4 px-6 text-sm font-extrabold text-neutral-100 transition-transform hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent-soft">
             Cancel
           </button>
         )}
@@ -192,32 +192,32 @@ function Products() {
   return (
     <div>
       <div className="max-w-2xl">
-        <h1 className="text-2xl font-bold text-white">Products</h1>
+        <h1 className="text-2xl font-bold text-neutral-50">Products</h1>
         <p className="mt-2 text-neutral-400">Create a quick checkout menu. Customers choose an item and your server supplies its trusted price.</p>
       </div>
 
-      <section className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900/60 p-5 sm:p-6">
-        <h2 className="text-lg font-semibold text-white">Add a product</h2>
+      <section className="mt-8 rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-5 shadow-[inset_0_1px_rgba(255,255,255,0.04)] sm:p-6">
+        <h2 className="text-lg font-semibold text-neutral-50">Add a product</h2>
         <div className="mt-4 max-w-xl">
           <ProductForm key={formVersion} isSaving={isSaving} onSubmit={createProduct} submitLabel="Add product" />
         </div>
       </section>
 
-      {error && <p className="mt-5 text-red-400" role="alert">{error}</p>}
+      {error && <p className="mt-5 text-danger" role="alert">{error}</p>}
 
       <section className="mt-8">
         <div className="flex items-end justify-between gap-4">
-          <h2 className="text-lg font-semibold text-white">Catalog</h2>
+          <h2 className="text-lg font-semibold text-neutral-50">Catalog</h2>
           <span className="text-sm text-neutral-500">{products.filter((product) => product.isActive).length} active</span>
         </div>
         {isLoading ? (
           <p className="mt-5 text-neutral-500">Loading products…</p>
         ) : products.length === 0 ? (
-          <p className="mt-5 rounded-xl border border-dashed border-neutral-700 p-8 text-center text-neutral-500">No products yet. Add your first item above.</p>
+          <p className="mt-5 rounded-[1.25rem] border border-dashed border-white/16 bg-white/[0.02] p-8 text-center text-neutral-500">No products yet. Add your first item above.</p>
         ) : (
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {products.map((product) => (
-              <article key={product.id} className={`rounded-xl border p-5 ${product.isActive ? 'border-neutral-800 bg-neutral-900/60' : 'border-neutral-800/60 bg-neutral-950/40 opacity-70'}`}>
+              <article key={product.id} className={`rounded-[1.25rem] border p-5 shadow-[inset_0_1px_rgba(255,255,255,0.04)] ${product.isActive ? 'border-white/10 bg-white/[0.035]' : 'border-white/6 bg-white/[0.02] opacity-70'}`}>
                 {editingId === product.id ? (
                   <ProductForm
                     initialValue={product}
@@ -230,15 +230,15 @@ function Products() {
                   <>
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="font-semibold text-white">{product.name}</h3>
+                        <h3 className="font-semibold text-neutral-50">{product.name}</h3>
                         <p className="mt-1 text-sm text-neutral-400">{product.description || 'No description'}</p>
                       </div>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${product.isActive ? 'bg-green-500/10 text-green-400' : 'bg-neutral-800 text-neutral-400'}`}>
+                      <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${product.isActive ? 'border-success/25 bg-success/8 text-success' : 'border-white/10 bg-white/4 text-neutral-400'}`}>
                         {product.isActive ? 'Active' : 'Archived'}
                       </span>
                     </div>
                     <div className="mt-5">
-                      <p className="text-xl font-bold text-amber-400">
+                      <p className="text-xl font-bold text-accent-soft">
                         {product.priceCurrency === 'MXN'
                           ? mxnPrice(product.priceMxnCents)
                           : `${product.priceSats.toLocaleString()} sats`}
@@ -248,8 +248,8 @@ function Products() {
                       )}
                     </div>
                     <div className="mt-5 flex gap-3 text-sm">
-                      <button type="button" onClick={() => setEditingId(product.id)} className="rounded-lg border border-neutral-700 px-4 py-2 font-medium text-white hover:border-amber-500 hover:text-amber-400">Edit</button>
-                      <button type="button" onClick={() => setProductActive(product, !product.isActive)} className="rounded-lg px-4 py-2 font-medium text-neutral-400 hover:text-white">
+                      <button type="button" onClick={() => setEditingId(product.id)} className="inline-flex min-h-10 items-center justify-center rounded-full border border-white/16 bg-white/4 px-4 font-extrabold text-neutral-100 transition-transform hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent-soft">Edit</button>
+                      <button type="button" onClick={() => setProductActive(product, !product.isActive)} className="inline-flex min-h-10 items-center justify-center rounded-full px-4 font-extrabold text-neutral-400 transition-colors hover:text-neutral-50">
                         {product.isActive ? 'Archive' : 'Reactivate'}
                       </button>
                     </div>

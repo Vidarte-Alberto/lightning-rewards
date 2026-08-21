@@ -16,8 +16,8 @@ function ApprovalSetup({ setup, error }) {
   };
 
   return (
-    <section className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/10 p-5" aria-labelledby="approval-setup-title">
-      <h2 id="approval-setup-title" className="font-semibold text-white">
+    <section className="mt-6 rounded-[1.25rem] border border-accent/25 bg-accent/[0.08] p-6" aria-labelledby="approval-setup-title">
+      <h2 id="approval-setup-title" className="font-semibold text-neutral-50">
         Finish setup in ShockWallet
       </h2>
       <p className="mt-2 text-sm text-neutral-300">
@@ -26,7 +26,7 @@ function ApprovalSetup({ setup, error }) {
       </p>
       {setup ? (
         <>
-          <p className="mt-3 text-sm font-medium text-amber-400">
+          <p className="mt-3 text-sm font-medium text-accent-soft">
             Recommended budget: {setup.recommendedBudget.amountSats.toLocaleString()} sats/month
           </p>
           <label htmlFor="platformNpub" className="mt-4 block text-sm font-medium text-neutral-300">
@@ -37,12 +37,12 @@ function ApprovalSetup({ setup, error }) {
               id="platformNpub"
               readOnly
               value={setup.identity.npub}
-              className="min-w-0 flex-1 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 font-mono text-xs text-neutral-300"
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 font-mono text-xs text-neutral-300"
             />
             <button
               type="button"
               onClick={copyIdentity}
-              className="rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:border-amber-500 hover:text-amber-400"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/16 bg-white/4 px-4 text-sm font-extrabold text-neutral-100 transition-transform hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent-soft"
             >
               Copy
             </button>
@@ -54,7 +54,7 @@ function ApprovalSetup({ setup, error }) {
           {copyStatus && <p className="mt-2 text-xs text-neutral-400" role="status">{copyStatus}</p>}
         </>
       ) : (
-        <p className={`mt-3 text-sm ${error ? 'text-red-400' : 'text-neutral-500'}`}>
+        <p className={`mt-3 text-sm ${error ? 'text-danger' : 'text-neutral-500'}`}>
           {error ?? 'Loading app identity…'}
         </p>
       )}
@@ -114,7 +114,7 @@ function Wallet() {
 
   return (
     <div className="max-w-md">
-      <h1 className="text-2xl font-bold text-white">Wallet</h1>
+      <h1 className="text-2xl font-bold text-neutral-50">Wallet</h1>
       <p className="mt-2 text-neutral-400">
         Paste the CLINK <code>ndebit</code> from ShockWallet to authorize Lightning payments.
       </p>
@@ -130,7 +130,7 @@ function Wallet() {
         />
 
         {status && (
-          <p className={`text-sm ${status.type === 'error' ? 'text-red-400' : 'text-green-400'}`} role="status">
+          <p className={`text-sm ${status.type === 'error' ? 'text-danger' : 'text-success'}`} role="status">
             {status.message}
           </p>
         )}
@@ -138,7 +138,7 @@ function Wallet() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400 disabled:opacity-50"
+          className="inline-flex min-h-13 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {isSubmitting ? 'Connecting…' : user.ndebitString ? 'Update wallet' : 'Connect wallet'}
         </button>

@@ -318,10 +318,10 @@
 .presentation-flow-node,
 .presentation-program-card,
 .presentation-stack,
-.presentation-protocol > div,
+.presentation-protocol > li,
 .presentation-demo-panel,
 .presentation-state,
-.presentation-guardrails > div {
+.presentation-guardrails > article {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1.25rem;
   background: rgba(255, 255, 255, 0.035);
@@ -647,7 +647,7 @@
 }
 
 .presentation-config-row div,
-.presentation-metrics div {
+.presentation-metrics article {
   padding: 1rem;
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.04);
@@ -1050,7 +1050,7 @@
   margin-top: 1.4rem;
 }
 
-.presentation-guardrails > div {
+.presentation-guardrails > article {
   padding: 1rem;
 }
 
@@ -1263,6 +1263,413 @@
   margin-top: 0.8rem;
 }
 
+/* Embedded-wallet product prototype */
+.presentation-onboarding-grid,
+.presentation-purchase-simulator {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+.presentation-onboarding-choice,
+.presentation-provisioning-panel,
+.presentation-wallet-app,
+.presentation-checkout-mock,
+.presentation-reward-mock,
+.presentation-pub-node,
+.presentation-account-detail {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.presentation-onboarding-choice,
+.presentation-provisioning-panel {
+  min-height: 19rem;
+  padding: 1rem;
+}
+
+.presentation-segmented {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.presentation-segmented button {
+  flex: 1;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 999px;
+  color: #737373;
+  background: transparent;
+  font-size: 0.67rem;
+  font-weight: 800;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.presentation-segmented button.is-active {
+  color: #171717;
+  background: var(--presentation-accent);
+}
+
+.presentation-onboarding-copy {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.7rem 0.8rem;
+  align-items: center;
+  padding: 1.2rem 0.35rem 0.2rem;
+}
+
+.presentation-wallet-glyph {
+  display: grid;
+  width: 3rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 0.9rem;
+  color: #171717;
+  background: var(--presentation-accent);
+  font-size: 1.2rem;
+}
+
+.presentation-wallet-glyph.is-outline {
+  border: 1px solid rgba(245, 165, 36, 0.4);
+  color: var(--presentation-accent);
+  background: rgba(245, 165, 36, 0.08);
+}
+
+.presentation-onboarding-copy small,
+.presentation-panel-label,
+.presentation-provisioning-panel header span,
+.presentation-pointer-row small,
+.presentation-account-detail > span {
+  color: var(--presentation-accent);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.presentation-onboarding-copy h3,
+.presentation-onboarding-copy p {
+  margin: 0;
+}
+
+.presentation-onboarding-copy h3 {
+  margin-top: 0.18rem;
+  font-size: 1rem;
+}
+
+.presentation-onboarding-copy p,
+.presentation-onboarding-copy label {
+  grid-column: 1 / -1;
+  color: #a3a3a3;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.presentation-onboarding-copy label,
+.presentation-send-panel label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.presentation-onboarding-copy input,
+.presentation-send-panel textarea {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.65rem;
+  color: #d4d4d4;
+  background: rgba(0, 0, 0, 0.28);
+  font: inherit;
+}
+
+.presentation-onboarding-copy > button,
+.presentation-wallet-action,
+.presentation-checkout-mock > button {
+  grid-column: 1 / -1;
+  min-height: 2.7rem;
+  border: 0;
+  border-radius: 0.75rem;
+  color: #171717;
+  background: var(--presentation-accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.presentation-onboarding-copy > button:disabled,
+.presentation-checkout-mock > button:disabled {
+  color: #f8d58b;
+  background: rgba(245, 165, 36, 0.1);
+  cursor: wait;
+}
+
+.presentation-provisioning-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.presentation-provisioning-panel header strong {
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  color: #6ee7b7;
+  background: rgba(52, 211, 153, 0.09);
+  font-size: 0.65rem;
+}
+
+.presentation-provisioning-panel ol {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.presentation-provisioning-panel li {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.65rem;
+  align-items: center;
+  opacity: 0.38;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.presentation-provisioning-panel li.is-complete {
+  opacity: 1;
+  transform: translateX(0.18rem);
+}
+
+.presentation-provisioning-panel li > span {
+  display: grid;
+  width: 2rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(245, 165, 36, 0.35);
+  border-radius: 50%;
+  color: var(--presentation-accent);
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.presentation-provisioning-panel li strong,
+.presentation-provisioning-panel li p {
+  margin: 0;
+}
+
+.presentation-provisioning-panel li strong { font-size: 0.78rem; }
+.presentation-provisioning-panel li p { margin-top: 0.12rem; color: #737373; font-size: 0.67rem; }
+
+.presentation-pointer-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.presentation-pointer-row > div {
+  min-width: 0;
+  padding: 0.6rem;
+  border-radius: 0.65rem;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.presentation-pointer-row small,
+.presentation-pointer-row code { display: block; }
+.presentation-pointer-row code { margin-top: 0.25rem; overflow: hidden; color: #d4d4d4; font-size: 0.6rem; text-overflow: ellipsis; }
+
+.presentation-wallet-app {
+  display: grid;
+  grid-template-columns: 13rem 1fr;
+  min-height: 21rem;
+  margin-top: 1.2rem;
+  overflow: hidden;
+}
+
+.presentation-wallet-app > aside {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.7rem;
+  align-content: start;
+  align-items: center;
+  padding: 1.2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.presentation-wallet-avatar {
+  display: grid;
+  width: 2.6rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  color: #171717;
+  background: var(--presentation-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.presentation-wallet-app aside strong,
+.presentation-wallet-app aside span { display: block; }
+.presentation-wallet-app aside strong { font-size: 0.82rem; }
+.presentation-wallet-app aside span,
+.presentation-wallet-app aside > small { color: #737373; font-size: 0.62rem; }
+.presentation-wallet-app aside > small { grid-column: 1 / -1; margin-top: 1rem; text-transform: uppercase; }
+
+.presentation-wallet-app > section { min-width: 0; }
+.presentation-wallet-app nav { display: flex; gap: 0.2rem; padding: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.presentation-wallet-app nav button { padding: 0.5rem 0.7rem; border: 0; border-radius: 999px; color: #737373; background: transparent; font-size: 0.66rem; font-weight: 800; text-transform: capitalize; cursor: pointer; }
+.presentation-wallet-app nav button.is-active { color: #f8d58b; background: rgba(245, 165, 36, 0.1); }
+.presentation-wallet-screen { min-height: 16.5rem; padding: 1rem; }
+
+.presentation-balance-card {
+  padding: 1.2rem;
+  border: 1px solid rgba(245, 165, 36, 0.25);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(245, 165, 36, 0.13), rgba(255, 255, 255, 0.025));
+}
+
+.presentation-balance-card > span { color: #a3a3a3; font-size: 0.68rem; }
+.presentation-balance-card > strong { display: block; margin-top: 0.35rem; color: #f8d58b; font-size: clamp(1.8rem, 4vw, 3.1rem); }
+.presentation-balance-card > strong small { color: #a3a3a3; font-size: 0.8rem; }
+.presentation-balance-card > div { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.presentation-balance-card button { padding: 0.55rem 0.8rem; border: 1px solid rgba(245, 165, 36, 0.3); border-radius: 999px; color: var(--presentation-accent); background: rgba(0, 0, 0, 0.2); font-size: 0.65rem; font-weight: 800; cursor: pointer; }
+
+.presentation-wallet-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.7rem; }
+.presentation-wallet-facts div { padding: 0.7rem; border-radius: 0.7rem; background: rgba(255, 255, 255, 0.035); }
+.presentation-wallet-facts span,
+.presentation-wallet-facts strong { display: block; }
+.presentation-wallet-facts span { color: #737373; font-size: 0.58rem; text-transform: uppercase; }
+.presentation-wallet-facts strong { margin-top: 0.25rem; font-size: 0.7rem; }
+
+.presentation-receive-panel { display: grid; grid-template-columns: auto 1fr; gap: 1.2rem; align-items: center; max-width: 34rem; margin: 0 auto; }
+.presentation-qr { display: grid; grid-template-columns: repeat(11, 0.65rem); gap: 1px; padding: 0.7rem; border-radius: 0.65rem; background: #fafafa; }
+.presentation-qr i { width: 0.65rem; aspect-ratio: 1; background: transparent; }
+.presentation-qr i.is-filled { background: #171717; }
+.presentation-receive-panel > div:last-child > strong { display: block; margin: 0.35rem 0 0.7rem; font-size: 1.5rem; }
+.presentation-receive-panel code { display: block; margin: 0.65rem 0; padding: 0.55rem; border-radius: 0.55rem; color: #a3a3a3; background: rgba(0, 0, 0, 0.25); font-size: 0.6rem; }
+.presentation-amount-chips { display: flex; gap: 0.35rem; }
+.presentation-amount-chips button { padding: 0.4rem 0.6rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; color: #a3a3a3; background: transparent; font-size: 0.62rem; cursor: pointer; }
+.presentation-amount-chips button.is-active { border-color: var(--presentation-accent); color: var(--presentation-accent); }
+.presentation-wallet-action { width: 100%; }
+
+.presentation-send-panel { width: min(28rem, 100%); margin: 0 auto; }
+.presentation-send-panel textarea { min-height: 4rem; margin-top: 0.4rem; resize: none; }
+.presentation-payment-summary { display: flex; justify-content: space-between; margin: 0.7rem 0; padding: 0.75rem; border-radius: 0.65rem; color: #a3a3a3; background: rgba(255, 255, 255, 0.035); font-size: 0.72rem; }
+.presentation-payment-summary strong { color: #f5f5f5; }
+.presentation-confirm-card,
+.presentation-payment-success { padding: 1rem; border: 1px solid rgba(245, 165, 36, 0.25); border-radius: 0.9rem; text-align: center; background: rgba(245, 165, 36, 0.06); }
+.presentation-confirm-card > strong { display: block; margin: 0.5rem; color: #f8d58b; font-size: 2rem; }
+.presentation-confirm-card p,
+.presentation-payment-success p { color: #a3a3a3; font-size: 0.72rem; }
+.presentation-confirm-card > div { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; }
+.presentation-confirm-card button,
+.presentation-payment-success button { padding: 0.55rem 0.8rem; border: 1px solid rgba(245, 165, 36, 0.3); border-radius: 999px; color: var(--presentation-accent); background: transparent; font-size: 0.65rem; font-weight: 800; cursor: pointer; }
+.presentation-confirm-card button:last-child { color: #171717; background: var(--presentation-accent); }
+.presentation-payment-success > span { display: grid; width: 3rem; margin: 0 auto; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #171717; background: #6ee7b7; font-weight: 900; }
+.presentation-payment-success h3 { margin: 0.6rem 0 0; }
+
+.presentation-activity-list { display: grid; gap: 0.45rem; }
+.presentation-activity-list article { display: grid; grid-template-columns: 2rem 1fr auto; gap: 0.65rem; align-items: center; padding: 0.6rem; border-radius: 0.7rem; background: rgba(255, 255, 255, 0.03); }
+.presentation-activity-list article > span { display: grid; width: 2rem; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #fca5a5; background: rgba(248, 113, 113, 0.08); }
+.presentation-activity-list article > span.is-inbound { color: #6ee7b7; background: rgba(52, 211, 153, 0.08); }
+.presentation-activity-list strong,
+.presentation-activity-list small { display: block; }
+.presentation-activity-list strong { font-size: 0.75rem; }
+.presentation-activity-list small { color: #737373; font-size: 0.62rem; }
+.presentation-activity-list b { color: #fca5a5; font-size: 0.7rem; }
+.presentation-activity-list b.is-inbound { color: #6ee7b7; }
+
+.presentation-checkout-mock,
+.presentation-reward-mock { padding: 1.1rem; }
+.presentation-checkout-mock header { display: grid; grid-template-columns: auto 1fr auto; gap: 0.7rem; align-items: center; }
+.presentation-checkout-mock header small,
+.presentation-checkout-mock header strong { display: block; }
+.presentation-checkout-mock header small { color: #737373; font-size: 0.62rem; }
+.presentation-checkout-mock header strong { margin-top: 0.2rem; }
+.presentation-checkout-mock header b { color: #f8d58b; }
+.presentation-merchant-mark { display: grid; width: 2.7rem; aspect-ratio: 1; place-items: center; border-radius: 0.8rem; color: #171717; background: var(--presentation-accent); font-size: 0.7rem; font-weight: 900; }
+.presentation-sim-balances { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.7rem; align-items: center; margin: 1rem 0; padding: 0.8rem; border-radius: 0.8rem; background: rgba(0, 0, 0, 0.22); }
+.presentation-sim-balances span { color: #737373; font-size: 0.63rem; }
+.presentation-sim-balances strong { display: block; margin-top: 0.2rem; color: #d4d4d4; font-size: 0.74rem; }
+.presentation-sim-balances i { color: var(--presentation-accent); font-style: normal; }
+.presentation-checkout-mock > button { width: 100%; }
+.presentation-sim-message { display: grid; grid-template-columns: auto auto 1fr; gap: 0.5rem; align-items: center; min-height: 2.2rem; margin: 0.75rem 0 0; color: #a3a3a3; font-size: 0.66rem; }
+.presentation-sim-message span { display: grid; width: 1.5rem; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #171717; background: var(--presentation-accent); font-weight: 900; }
+.presentation-sim-message strong { color: #f8d58b; }
+.presentation-reward-mock { display: flex; flex-direction: column; justify-content: center; background: linear-gradient(145deg, #262626, #141414); transition: border-color 260ms ease, transform 260ms ease, box-shadow 260ms ease; }
+.presentation-reward-mock.is-unlocked { border-color: var(--presentation-accent); box-shadow: 0 0 3rem rgba(245, 165, 36, 0.14); transform: translateY(-0.2rem); }
+.presentation-reward-mock > div:first-child { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.presentation-reward-mock small { color: #737373; }
+.presentation-reward-mock p { margin: 0.9rem 0 0; color: #a3a3a3; font-size: 0.72rem; }
+.presentation-sim-timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 0.65rem 0 0; padding: 0; list-style: none; }
+.presentation-sim-timeline li { display: flex; gap: 0.45rem; align-items: center; padding: 0.5rem; border-radius: 999px; color: #737373; background: rgba(255, 255, 255, 0.03); font-size: 0.62rem; font-weight: 800; }
+.presentation-sim-timeline li span { display: grid; width: 1.3rem; aspect-ratio: 1; place-items: center; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.12); }
+.presentation-sim-timeline li.is-active { color: #f8d58b; background: rgba(245, 165, 36, 0.08); }
+.presentation-sim-timeline li.is-active span { color: #171717; background: var(--presentation-accent); }
+
+.presentation-pub-map { display: grid; grid-template-columns: 0.8fr auto 1fr 0.9fr; gap: 0.8rem; align-items: center; margin-top: 1.3rem; }
+.presentation-pub-node { overflow: hidden; }
+.presentation-node-core { padding: 1.1rem; text-align: center; }
+.presentation-node-core > span { display: grid; width: 3rem; margin: 0 auto 0.6rem; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #171717; background: var(--presentation-accent); }
+.presentation-node-core small,
+.presentation-node-core strong,
+.presentation-node-core p { display: block; margin: 0; }
+.presentation-node-core small { color: #737373; font-size: 0.6rem; text-transform: uppercase; }
+.presentation-node-core strong { margin: 0.25rem 0; }
+.presentation-node-core p { color: #a3a3a3; font-size: 0.65rem; }
+.presentation-node-lnd { padding: 0.7rem; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.2); }
+.presentation-node-lnd small,
+.presentation-node-lnd strong { display: block; }
+.presentation-node-lnd small { color: var(--presentation-accent); font-size: 0.58rem; text-transform: uppercase; }
+.presentation-node-lnd strong { margin-top: 0.2rem; font-size: 0.65rem; }
+.presentation-account-lines { display: grid; gap: 1.55rem; }
+.presentation-account-lines i { display: block; width: 2rem; height: 1px; background: rgba(245, 165, 36, 0.35); }
+.presentation-account-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.55rem; }
+.presentation-account-grid button { display: grid; grid-template-columns: auto 1fr; gap: 0.55rem; align-items: center; padding: 0.7rem; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 0.8rem; color: #d4d4d4; background: rgba(255, 255, 255, 0.025); text-align: left; cursor: pointer; opacity: 0.55; transition: opacity 180ms ease, border-color 180ms ease, transform 180ms ease; }
+.presentation-account-grid button:hover,
+.presentation-account-grid button.is-active { border-color: rgba(245, 165, 36, 0.5); opacity: 1; transform: translateY(-0.12rem); }
+.presentation-account-grid button > span { display: grid; width: 2.1rem; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #171717; background: #f5a524; font-size: 0.58rem; font-weight: 900; }
+.presentation-account-grid button.is-blue > span { background: #93c5fd; }
+.presentation-account-grid button.is-green > span { background: #6ee7b7; }
+.presentation-account-grid button.is-orange > span { background: #fb923c; }
+.presentation-account-grid strong,
+.presentation-account-grid small { display: block; }
+.presentation-account-grid strong { font-size: 0.68rem; }
+.presentation-account-grid small { margin-top: 0.15rem; color: #737373; font-size: 0.58rem; }
+.presentation-account-detail { min-height: 13rem; padding: 1rem; }
+.presentation-account-detail h3 { margin: 0.35rem 0; }
+.presentation-account-detail > strong { color: #f8d58b; font-size: 1.35rem; }
+.presentation-account-detail > p { color: #a3a3a3; font-size: 0.7rem; line-height: 1.5; }
+.presentation-account-detail > div { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.6rem; padding-top: 0.65rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.presentation-account-detail > div small { color: #737373; font-size: 0.58rem; text-transform: uppercase; }
+.presentation-account-detail > div b { font-size: 0.65rem; }
+
+.presentation-slide-wallet-onboarding .presentation-heading h2,
+.presentation-slide-embedded-wallet .presentation-heading h2,
+.presentation-slide-loyalty-simulation .presentation-heading h2,
+.presentation-slide-multi-wallet .presentation-heading h2 {
+  max-width: 22ch;
+  font-size: clamp(2.15rem, 4vw, 3.55rem);
+}
+
+.presentation-slide-wallet-onboarding .presentation-lede,
+.presentation-slide-embedded-wallet .presentation-lede,
+.presentation-slide-loyalty-simulation .presentation-lede,
+.presentation-slide-multi-wallet .presentation-lede {
+  margin-top: 0.7rem;
+  font-size: 0.95rem;
+}
+
+.presentation-slide-clink .presentation-clink-glossary { grid-template-columns: repeat(4, 1fr); }
+
 @media (max-width: 1400px) and (min-width: 681px) {
   .presentation-stage {
     align-items: flex-start;
@@ -1404,6 +1811,55 @@
   .presentation-clink-glossary > div {
     padding: 0.5rem;
   }
+
+  .presentation-onboarding-grid,
+  .presentation-purchase-simulator,
+  .presentation-wallet-app,
+  .presentation-pub-map {
+    margin-top: 0.75rem;
+  }
+
+  .presentation-onboarding-choice,
+  .presentation-provisioning-panel {
+    min-height: 16.5rem;
+    padding: 0.75rem;
+  }
+
+  .presentation-onboarding-copy {
+    padding-top: 0.7rem;
+  }
+
+  .presentation-provisioning-panel ol {
+    gap: 0.45rem;
+    margin: 0.65rem 0;
+  }
+
+  .presentation-wallet-app {
+    grid-template-columns: 11rem 1fr;
+    min-height: 17rem;
+  }
+
+  .presentation-wallet-screen {
+    min-height: 12rem;
+    padding: 0.7rem;
+  }
+
+  .presentation-balance-card {
+    padding: 0.8rem;
+  }
+
+  .presentation-balance-card > strong {
+    font-size: 2rem;
+  }
+
+  .presentation-checkout-mock,
+  .presentation-reward-mock {
+    padding: 0.8rem;
+  }
+
+  .presentation-pub-map {
+    grid-template-columns: 0.75fr auto 1fr 0.9fr;
+  }
 }
 
 @media (max-width: 680px) {
@@ -1483,6 +1939,56 @@
   .presentation-clink-glossary {
     grid-template-columns: 1fr;
   }
+
+  .presentation-slide-clink .presentation-clink-glossary,
+  .presentation-onboarding-grid,
+  .presentation-purchase-simulator,
+  .presentation-pub-map {
+    grid-template-columns: 1fr;
+  }
+
+  .presentation-onboarding-choice,
+  .presentation-provisioning-panel {
+    min-height: 0;
+  }
+
+  .presentation-wallet-app {
+    grid-template-columns: 1fr;
+  }
+
+  .presentation-wallet-app > aside {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .presentation-wallet-app aside > small {
+    display: none;
+  }
+
+  .presentation-wallet-app nav {
+    overflow-x: auto;
+  }
+
+  .presentation-receive-panel {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .presentation-receive-panel > div:last-child {
+    width: 100%;
+  }
+
+  .presentation-account-lines {
+    display: none;
+  }
+
+  .presentation-account-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .presentation-sim-timeline {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1515,7 +2021,11 @@
   .presentation-config-row,
   .presentation-metrics,
   .presentation-guardrails,
-  .presentation-state-branches {
+  .presentation-state-branches,
+  .presentation-pointer-row,
+  .presentation-wallet-facts,
+  .presentation-account-grid,
+  .presentation-sim-timeline {
     grid-template-columns: 1fr;
   }
 

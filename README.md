@@ -28,11 +28,55 @@ from its own directory.
 - Lightning.Pub with a working `noffer1…` for a live business demo
 - ShockWallet with a funded `ndebit1…` for a live customer demo
 
-On macOS, PostgreSQL can be installed with:
+On Ubuntu, install Node.js 20, npm, OpenSSL, build tools, and PostgreSQL 16 with:
 
 ```bash
-brew install postgresql@16
-brew services start postgresql@16
+sudo apt update
+sudo apt install -y ca-certificates curl gnupg openssl build-essential
+
+curl -fsSL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
+sudo -E bash /tmp/nodesource_setup.sh
+sudo apt install -y nodejs
+
+sudo install -d /usr/share/postgresql-common/pgdg
+sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+sudo sh -c 'echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+sudo apt update
+sudo apt install -y postgresql-16 postgresql-client-16
+sudo systemctl enable --now postgresql
+```
+
+### Lightning.Pub on Ubuntu
+
+For a live payment demo, install Lightning.Pub separately on the machine that will
+receive payments:
+
+```bash
+wget -qO- https://deploy.lightning.pub | bash
+```
+
+The installer creates user-level `systemd` services and stores data under
+`~/lightning_pub/`. After installation, confirm the services are running:
+
+```bash
+systemctl --user status lnd
+systemctl --user status lightning_pub
+```
+
+The admin connection string is printed by the installer and saved at:
+
+```bash
+cat ~/lightning_pub/admin.connect
+```
+
+If the machine has an older system-wide Lightning.Pub install, stop and remove those
+old units before running the new user-level installer:
+
+```bash
+sudo systemctl stop lnd lightning_pub
+sudo systemctl disable lnd lightning_pub
+sudo rm /etc/systemd/system/lnd.service /etc/systemd/system/lightning_pub.service
+sudo systemctl daemon-reload
 ```
 
 ## Local setup
@@ -40,7 +84,8 @@ brew services start postgresql@16
 ### 1. Create the database
 
 ```bash
-createdb lightning_rewards
+sudo -u postgres psql -c "CREATE USER lightning_rewards WITH PASSWORD 'dev_password';"
+sudo -u postgres psql -c "CREATE DATABASE lightning_rewards OWNER lightning_rewards;"
 ```
 
 ### 2. Configure and start the backend
@@ -55,7 +100,7 @@ Set these required values in `backend/.env`:
 
 ```dotenv
 PORT=3000
-DATABASE_URL="postgresql://<postgres-user>@localhost:5432/lightning_rewards?schema=public"
+DATABASE_URL="postgresql://lightning_rewards:dev_password@localhost:5432/lightning_rewards?schema=public"
 JWT_SECRET="<output-of-openssl-rand-hex-32>"
 CLINK_PRIVATE_KEY="<output-of-openssl-rand-hex-32>"
 CLINK_TIMEOUT_SECONDS=30

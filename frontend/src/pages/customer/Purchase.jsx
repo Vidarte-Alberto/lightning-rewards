@@ -105,19 +105,19 @@ function Purchase() {
   }
 
   if (status === 'load-error') {
-    return <p className="text-red-400" role="alert">{loadError}</p>;
+    return <p className="text-danger" role="alert">{loadError}</p>;
   }
 
   if (!user.ndebitString) {
     return (
       <div className="max-w-md">
-        <h1 className="text-2xl font-bold text-white">Connect your wallet first</h1>
+        <h1 className="text-2xl font-bold text-neutral-50">Connect your wallet first</h1>
         <p className="mt-2 text-neutral-400">
           You need to connect a Lightning wallet before you can pay {business.name}.
         </p>
         <Link
           to="/customer/wallet"
-          className="mt-6 inline-block rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400"
+          className="mt-6 inline-flex min-h-13 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5"
         >
           Connect wallet
         </Link>
@@ -128,8 +128,8 @@ function Purchase() {
   if (status === 'pending') {
     return (
       <div className="max-w-md py-16 text-center" role="status">
-        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-neutral-800 border-t-amber-500" />
-        <h1 className="mt-6 text-xl font-semibold text-white">Waiting for wallet approval…</h1>
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-white/10 border-t-accent" />
+        <h1 className="mt-6 text-xl font-semibold text-neutral-50">Waiting for wallet approval…</h1>
         <p className="mt-2 text-neutral-400">
           Open ShockWallet and approve the Lightning Rewards payment request to continue.
         </p>
@@ -140,7 +140,7 @@ function Purchase() {
   if (status === 'success') {
     return (
       <div className="max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-white">Payment confirmed</h1>
+        <h1 className="text-2xl font-bold text-neutral-50">Payment confirmed</h1>
         <p className="mt-2 text-neutral-400">
           {result.transaction.productName
             ? `${result.transaction.productName} was paid successfully. `
@@ -148,7 +148,7 @@ function Purchase() {
           You earned a stamp at {business.name}.
         </p>
         {result.loyalty?.rewardUnlocked && (
-          <p className="mt-4 text-lg font-semibold text-amber-400">
+          <p className="mt-4 text-lg font-semibold text-accent-soft">
             🎉 Reward unlocked: {result.loyalty.reward.description}
           </p>
         )}
@@ -158,10 +158,16 @@ function Purchase() {
           </p>
         )}
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
-          <Link to="/customer/cards" className="rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400">
+          <Link
+            to="/customer/cards"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5"
+          >
             View my cards
           </Link>
-          <Link to="/customer/discover" className="rounded-lg border border-neutral-700 px-6 py-3 font-medium text-white transition-colors hover:border-amber-500 hover:text-amber-400">
+          <Link
+            to="/customer/discover"
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/16 bg-white/4 px-6 text-sm font-extrabold text-neutral-100 transition-transform hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent-soft"
+          >
             Discover more
           </Link>
         </div>
@@ -172,11 +178,14 @@ function Purchase() {
   if (status === 'unconfirmed') {
     return (
       <div className="max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-white">Payment not confirmed</h1>
+        <h1 className="text-2xl font-bold text-neutral-50">Payment not confirmed</h1>
         <p className="mt-2 text-neutral-400">
           We could not confirm the final payment status. Check your wallet before trying again.
         </p>
-        <Link to="/customer/discover" className="mt-6 inline-block rounded-lg border border-neutral-700 px-6 py-3 font-medium text-white hover:border-amber-500 hover:text-amber-400">
+        <Link
+          to="/customer/discover"
+          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-white/16 bg-white/4 px-6 text-sm font-extrabold text-neutral-100 transition-transform hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent-soft"
+        >
           Back to Discover
         </Link>
       </div>
@@ -188,7 +197,7 @@ function Purchase() {
 
     return (
       <div className="max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-neutral-50">
           {approvalDenied ? 'Payment approval declined' : 'Payment failed'}
         </h1>
         <p className="mt-2 text-neutral-400" role="alert">
@@ -200,7 +209,7 @@ function Purchase() {
         <button
           type="button"
           onClick={retry}
-          className="mt-6 rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400"
+          className="mt-6 inline-flex min-h-13 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5"
         >
           {approvalDenied ? 'Try payment again' : 'Try again'}
         </button>
@@ -210,19 +219,19 @@ function Purchase() {
 
   return (
     <div className="max-w-md">
-      <h1 className="text-2xl font-bold text-white">Buy from {business.name}</h1>
+      <h1 className="text-2xl font-bold text-neutral-50">Buy from {business.name}</h1>
       <p className="mt-2 text-neutral-400">
         {business.rewardDescription} every {business.stampsRequired} stamps.
       </p>
 
-      <div className="mt-6 flex rounded-lg border border-neutral-800 bg-neutral-900 p-1" role="tablist" aria-label="Purchase type">
+      <div className="mt-6 flex rounded-full border border-white/10 bg-white/[0.035] p-1" role="tablist" aria-label="Purchase type">
         {products.length > 0 && (
           <button
             type="button"
             role="tab"
             aria-selected={purchaseMode === 'product'}
             onClick={() => setPurchaseMode('product')}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${purchaseMode === 'product' ? 'bg-amber-500 text-neutral-950' : 'text-neutral-400 hover:text-white'}`}
+            className={`min-h-10 flex-1 rounded-full px-4 py-2 text-sm font-extrabold transition-colors ${purchaseMode === 'product' ? 'bg-accent text-neutral-900' : 'text-neutral-400 hover:text-neutral-50'}`}
           >
             Products
           </button>
@@ -232,7 +241,7 @@ function Purchase() {
           role="tab"
           aria-selected={purchaseMode === 'custom'}
           onClick={() => setPurchaseMode('custom')}
-          className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${purchaseMode === 'custom' ? 'bg-amber-500 text-neutral-950' : 'text-neutral-400 hover:text-white'}`}
+          className={`min-h-10 flex-1 rounded-full px-4 py-2 text-sm font-extrabold transition-colors ${purchaseMode === 'custom' ? 'bg-accent text-neutral-900' : 'text-neutral-400 hover:text-neutral-50'}`}
         >
           Custom amount
         </button>
@@ -246,7 +255,7 @@ function Purchase() {
               {products.map((product) => {
                 const selected = selectedProductId === product.id;
                 return (
-                  <label key={product.id} className={`cursor-pointer rounded-xl border p-4 transition-colors ${selected ? 'border-amber-500 bg-amber-500/10' : 'border-neutral-800 bg-neutral-900/60 hover:border-neutral-600'}`}>
+                  <label key={product.id} className={`cursor-pointer rounded-[1.25rem] border p-4 shadow-[inset_0_1px_rgba(255,255,255,0.04)] transition-all ${selected ? 'border-accent/60 bg-accent/10' : 'border-white/10 bg-white/[0.035] hover:-translate-y-0.5 hover:border-white/20'}`}>
                     <input
                       type="radio"
                       name="product"
@@ -255,9 +264,9 @@ function Purchase() {
                       onChange={() => setSelectedProductId(product.id)}
                       className="sr-only"
                     />
-                    <span className="block font-semibold text-white">{product.name}</span>
+                    <span className="block font-semibold text-neutral-50">{product.name}</span>
                     {product.description && <span className="mt-1 block text-sm text-neutral-400">{product.description}</span>}
-                    <span className="mt-3 block font-bold text-amber-400">{productPriceLabel(product)}</span>
+                    <span className="mt-3 block font-bold text-accent-soft">{productPriceLabel(product)}</span>
                     {product.priceCurrency === 'MXN' && (
                       <span className="mt-1 block text-xs text-neutral-500">≈ {product.priceSats.toLocaleString()} sats; refreshed at checkout</span>
                     )}
@@ -281,7 +290,7 @@ function Purchase() {
         <button
           type="submit"
           disabled={purchaseMode === 'product' && !selectedProductId}
-          className="w-full rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400"
+          className="inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {purchaseMode === 'product' && selectedProductId
             ? `Pay ${productPriceLabel(products.find((product) => product.id === selectedProductId))}`

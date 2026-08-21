@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 function Hero() {
   return (
     <section className="max-w-5xl mx-auto px-6 py-20 text-center">
-      <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight">
+      <h1 className="text-4xl sm:text-5xl font-bold text-neutral-50 leading-tight">
         Every payment becomes a reason to return.
       </h1>
       <p className="mt-4 text-lg text-neutral-400 max-w-2xl mx-auto">
@@ -13,19 +13,19 @@ function Hero() {
       <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
         <Link
           to="/register?role=business"
-          className="px-6 py-3 rounded-lg bg-amber-500 text-neutral-950 font-semibold hover:bg-amber-400 transition-colors"
+          className="inline-flex min-h-13 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5"
         >
           {"I'm a business"}
         </Link>
         <Link
           to="/register?role=customer"
-          className="px-6 py-3 rounded-lg border border-neutral-700 text-white font-medium hover:border-amber-500 hover:text-amber-400 transition-colors"
+          className="inline-flex min-h-13 items-center justify-center rounded-full border border-white/16 bg-white/4 px-6 text-sm font-extrabold text-neutral-100 transition-transform hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent-soft"
         >
           {"I'm a customer"}
         </Link>
         <Link
           to="/presentation"
-          className="px-6 py-3 rounded-lg text-amber-400 font-medium hover:bg-amber-500/10 transition-colors"
+          className="inline-flex min-h-13 items-center justify-center rounded-full px-6 text-sm font-extrabold text-accent-soft transition-colors hover:bg-accent/10"
         >
           View hackathon presentation
         </Link>

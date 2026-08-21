@@ -120,8 +120,8 @@ test('loads loyalty cards from the backend', async () => {
   renderCustomerRoute('/customer/cards');
 
   expect(await screen.findByRole('heading', { name: 'Lightning Cafe' })).toBeInTheDocument();
+  expect(screen.getByText('3 of 5 stamps')).toBeInTheDocument();
   expect(screen.getByLabelText('3 of 5 stamps')).toBeInTheDocument();
-  expect(screen.getByText(/8 total earned/)).toBeInTheDocument();
   expect(fetch).toHaveBeenCalledWith(
     'http://localhost:3000/customers/me/cards',
     expect.any(Object),

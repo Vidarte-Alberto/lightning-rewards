@@ -16,7 +16,7 @@ function FormField({ id, label, type = 'text', value, onChange, required, placeh
         autoComplete={autoComplete}
         value={value}
         onChange={onChange}
-        className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 text-white placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:border-amber-500"
+        className="mt-1 w-full rounded-lg border border-white/10 bg-neutral-900 text-neutral-50 placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:border-accent"
       />
     </div>
   );
