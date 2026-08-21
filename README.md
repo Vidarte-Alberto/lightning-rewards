@@ -87,6 +87,6 @@ receive payments; a customer connects an `ndebit` string to pay. Before touching
 
 ## Conventions
 
-- Table/model names in English; user-facing strings in Spanish.
+- Table/model names and user-facing strings both in English.
 - Never commit `.env` — sensitive values (DB credentials, Nostr keys, JWT secret) stay
   local.

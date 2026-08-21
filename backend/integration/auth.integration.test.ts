@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
+import type { MockedFunction } from 'vitest';
 
 import { Role } from '../src/generated/prisma/client';
 import { login, register, updateCustomerProfile } from '../src/auth';
@@ -77,7 +78,7 @@ test('rejects customer-only routes for business users', () => {
     },
   } as Request;
   const res = {} as Response;
-  const next = jest.fn() as jest.MockedFunction<NextFunction>;
+  const next = vi.fn() as MockedFunction<NextFunction>;
 
   requireRole(Role.CUSTOMER)(req, res, next);
 
