@@ -9,7 +9,7 @@ import {
   clinkFormatMessage,
   hasClinkPrefix,
   type ClinkPointerType,
-} from './clink.validation';
+} from '../validation/clink';
 
 const PASSWORD_SALT_ROUNDS = 12;
 const TOKEN_EXPIRES_IN = '7d';

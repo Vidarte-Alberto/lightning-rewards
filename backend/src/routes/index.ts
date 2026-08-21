@@ -6,6 +6,7 @@ import { Role } from '../generated/prisma/client';
 import { asyncHandler, requireAuth, requireRole } from '../middlewares';
 import {
   ClinkService,
+  checkOwnedBusinessOffer,
   getBusinessCustomers,
   getBusinessDetail,
   getCustomerCards,
@@ -96,6 +97,16 @@ router.get(
   asyncHandler(async (req, res) => {
     const transactions = await getOwnedBusinessTransactions(req.user.id);
     res.json({ transactions });
+  }),
+);
+
+router.post(
+  '/businesses/me/offer-test',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const offerStatus = await checkOwnedBusinessOffer(req.user.id, clinkService);
+    res.json({ offerStatus });
   }),
 );
 

@@ -1,7 +1,7 @@
 import {
   clinkFormatMessage,
   hasClinkPrefix,
-} from '../src/auth/clink.validation';
+} from '../src/validation/clink';
 
 test.each([
   ['noffer1abc', 'noffer'],

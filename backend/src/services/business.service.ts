@@ -1,5 +1,6 @@
 import prisma from '../db/prisma';
 import { AppError } from '../middlewares';
+import { clinkFormatMessage, hasClinkPrefix } from '../validation/clink';
 
 type BusinessFilters = {
   category?: unknown;
@@ -202,7 +203,11 @@ export const updateOwnedBusiness = async (
   }
 
   if (input.nofferString !== undefined) {
-    data.nofferString = readRequiredString(input.nofferString, 'nofferString');
+    const nofferString = readRequiredString(input.nofferString, 'nofferString');
+    if (!hasClinkPrefix(nofferString, 'noffer')) {
+      throw new AppError(400, clinkFormatMessage('nofferString', 'noffer'));
+    }
+    data.nofferString = nofferString;
   }
 
   if (Object.keys(data).length === 0) {

@@ -3,11 +3,13 @@ import { randomUUID } from 'node:crypto';
 import { Role, TransactionStatus } from '../src/generated/prisma/client';
 import prisma from '../src/db/prisma';
 import {
+  checkOwnedBusinessOffer,
   getOwnedBusiness,
   getOwnedBusinessCustomers,
   getOwnedBusinessTransactions,
   updateOwnedBusiness,
 } from '../src/services';
+import { ClinkServiceError } from '../src/services/clink.errors';
 
 const testId = randomUUID();
 
@@ -38,7 +40,7 @@ beforeAll(async () => {
       ownerId: owner.id,
       name: 'Dashboard Test Business',
       category: 'Test',
-      nofferString: `noffer-dashboard-${testId}`,
+      nofferString: `noffer1dashboard${testId}`,
       stampsRequired: 5,
       rewardDescription: 'Original reward',
     },
@@ -104,13 +106,13 @@ test('returns and updates the authenticated owner business', async () => {
   const updated = await updateOwnedBusiness(ownerId, {
     stampsRequired: 7,
     rewardDescription: 'Updated reward',
-    nofferString: `noffer-updated-${testId}`,
+    nofferString: `noffer1updated${testId}`,
   });
 
   expect(updated).toMatchObject({
     stampsRequired: 7,
     rewardDescription: 'Updated reward',
-    nofferString: `noffer-updated-${testId}`,
+    nofferString: `noffer1updated${testId}`,
   });
 });
 
@@ -148,5 +150,48 @@ test('validates program updates and missing business profiles', async () => {
 
   await expect(getOwnedBusiness(randomUUID())).rejects.toMatchObject({
     statusCode: 404,
+  });
+
+  await expect(
+    updateOwnedBusiness(ownerId, { nofferString: `npub1${testId}` }),
+  ).rejects.toMatchObject({
+    statusCode: 400,
+    message: 'nofferString must be a CLINK noffer starting with noffer1',
+  });
+});
+
+test('checks whether the saved CLINK offer can generate an invoice', async () => {
+  const testOffer = `noffer1health${testId}`;
+  await updateOwnedBusiness(ownerId, { nofferString: testOffer });
+
+  const offerPort = {
+    requestInvoiceFromOffer: vi.fn().mockResolvedValue('lnbc-test-invoice'),
+  };
+
+  const result = await checkOwnedBusinessOffer(ownerId, offerPort);
+
+  expect(result).toMatchObject({ status: 'available' });
+  expect(offerPort.requestInvoiceFromOffer).toHaveBeenCalledWith(
+    testOffer,
+    10,
+    'Lightning Rewards offer test',
+  );
+});
+
+test('reports an unavailable CLINK offer without leaking protocol details', async () => {
+  const offerPort = {
+    requestInvoiceFromOffer: vi.fn().mockRejectedValue(
+      new ClinkServiceError({
+        operation: 'offer',
+        code: 'CLINK_OFFER_TIMEOUT',
+        publicMessage: 'Internal protocol message',
+      }),
+    ),
+  };
+
+  await expect(checkOwnedBusinessOffer(ownerId, offerPort)).resolves.toMatchObject({
+    status: 'unavailable',
+    code: 'CLINK_OFFER_TIMEOUT',
+    message: 'Lightning.Pub did not respond to the test invoice request.',
   });
 });
