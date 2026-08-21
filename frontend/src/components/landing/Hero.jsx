@@ -23,6 +23,12 @@ function Hero() {
         >
           {"I'm a customer"}
         </Link>
+        <Link
+          to="/presentation"
+          className="px-6 py-3 rounded-lg text-amber-700 font-medium hover:bg-amber-50 transition-colors"
+        >
+          View hackathon presentation
+        </Link>
       </div>
     </section>
   );
