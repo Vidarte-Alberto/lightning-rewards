@@ -203,3 +203,83 @@ test('loads the authenticated business transaction history', async () => {
     ),
   );
 });
+
+test('creates and archives products in the business catalog', async () => {
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ products: [] }))
+    .mockResolvedValueOnce(jsonResponse({
+      product: {
+        id: 'latte-id',
+        businessId: business.id,
+        name: 'House Latte',
+        description: 'Espresso and milk',
+        priceCurrency: 'SATS',
+        priceSats: 150,
+        isActive: true,
+      },
+    }), 201)
+    .mockResolvedValueOnce(jsonResponse({
+      product: {
+        id: 'latte-id',
+        businessId: business.id,
+        name: 'House Latte',
+        description: 'Espresso and milk',
+        priceCurrency: 'SATS',
+        priceSats: 150,
+        isActive: false,
+      },
+    }));
+
+  renderBusinessRoute('/business/products');
+
+  await screen.findByText('No products yet. Add your first item above.');
+  fireEvent.change(screen.getByLabelText('Product name'), { target: { value: 'House Latte' } });
+  fireEvent.change(screen.getByLabelText('Description (optional)'), { target: { value: 'Espresso and milk' } });
+  fireEvent.change(screen.getByLabelText('Price (sats)'), { target: { value: '150' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Add product' }));
+
+  expect(await screen.findByRole('heading', { name: 'House Latte' })).toBeInTheDocument();
+  expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({
+    name: 'House Latte',
+    description: 'Espresso and milk',
+    priceCurrency: 'SATS',
+    priceSats: 150,
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Archive' }));
+  expect(await screen.findByText('Archived')).toBeInTheDocument();
+  expect(fetch.mock.calls[2][1]).toEqual(expect.objectContaining({ method: 'DELETE' }));
+});
+
+test('creates a product priced in MXN and shows its converted sats estimate', async () => {
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ products: [] }))
+    .mockResolvedValueOnce(jsonResponse({
+      product: {
+        id: 'mxn-latte-id',
+        businessId: business.id,
+        name: 'MXN Latte',
+        description: null,
+        priceCurrency: 'MXN',
+        priceMxnCents: 5_000,
+        priceSats: 2_500,
+        isActive: true,
+      },
+    }), 201);
+
+  renderBusinessRoute('/business/products');
+
+  await screen.findByText('No products yet. Add your first item above.');
+  fireEvent.change(screen.getByLabelText('Product name'), { target: { value: 'MXN Latte' } });
+  fireEvent.change(screen.getByLabelText('Price currency'), { target: { value: 'MXN' } });
+  fireEvent.change(screen.getByLabelText('Price (MXN)'), { target: { value: '50' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Add product' }));
+
+  expect(await screen.findByText('≈ 2,500 sats at the latest rate')).toBeInTheDocument();
+  expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({
+    name: 'MXN Latte',
+    description: '',
+    priceCurrency: 'MXN',
+    priceMxn: 50,
+  });
+});

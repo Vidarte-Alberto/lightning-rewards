@@ -249,6 +249,7 @@ export const getOwnedBusinessTransactions = async (ownerId: string) => {
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
+      productName: true,
       amountSats: true,
       status: true,
       failureCode: true,

@@ -11,6 +11,7 @@ import Purchase from './pages/customer/Purchase';
 import Dashboard from './pages/business/Dashboard';
 import Settings from './pages/business/Settings';
 import Transactions from './pages/business/Transactions';
+import Products from './pages/business/Products';
 import Presentation from './pages/Presentation';
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
         <Route path="/business/dashboard" element={<Dashboard />} />
         <Route path="/business/settings" element={<Settings />} />
         <Route path="/business/transactions" element={<Transactions />} />
+        <Route path="/business/products" element={<Products />} />
       </Route>
     </Routes>
   );

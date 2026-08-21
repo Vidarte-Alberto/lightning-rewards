@@ -3,6 +3,7 @@ import { PaymentServiceError, type PurchaseInput } from '../services';
 type PurchaseBody = {
   businessId?: unknown;
   amountSats?: unknown;
+  productId?: unknown;
   idempotencyKey?: unknown;
 };
 
@@ -20,8 +21,23 @@ export const purchaseInputFromRequest = (
     throw new PaymentServiceError('INVALID_BUSINESS_ID', 'The business is required.', 400);
   }
 
-  if (typeof purchaseBody.amountSats !== 'number') {
+  const hasAmount = purchaseBody.amountSats !== undefined;
+  const hasProduct = purchaseBody.productId !== undefined;
+
+  if (hasAmount === hasProduct) {
+    throw new PaymentServiceError(
+      'INVALID_PURCHASE_SELECTION',
+      'Choose either a product or a custom amount.',
+      400,
+    );
+  }
+
+  if (hasAmount && typeof purchaseBody.amountSats !== 'number') {
     throw new PaymentServiceError('INVALID_AMOUNT', 'The amount must be expressed in sats.', 400);
+  }
+
+  if (hasProduct && typeof purchaseBody.productId !== 'string') {
+    throw new PaymentServiceError('INVALID_PRODUCT_ID', 'The product is required.', 400);
   }
 
   if (typeof purchaseBody.idempotencyKey !== 'string') {
@@ -35,7 +51,8 @@ export const purchaseInputFromRequest = (
   return {
     businessId: purchaseBody.businessId,
     customerId,
-    amountSats: purchaseBody.amountSats,
+    ...(hasAmount ? { amountSats: purchaseBody.amountSats as number } : {}),
+    ...(hasProduct ? { productId: purchaseBody.productId as string } : {}),
     idempotencyKey: purchaseBody.idempotencyKey,
   };
 };

@@ -59,6 +59,7 @@ DATABASE_URL="postgresql://<postgres-user>@localhost:5432/lightning_rewards?sche
 JWT_SECRET="<output-of-openssl-rand-hex-32>"
 CLINK_PRIVATE_KEY="<output-of-openssl-rand-hex-32>"
 CLINK_TIMEOUT_SECONDS=30
+COINGECKO_API_KEY="<optional-demo-api-key>"
 ```
 
 Generate secure local secrets with:
@@ -70,6 +71,9 @@ openssl rand -hex 32
 `CLINK_PRIVATE_KEY` must remain stable. ShockWallet associates approval rules and
 budgets with the public identity derived from this key. Changing it makes Lightning
 Rewards appear as a different application.
+
+`COINGECKO_API_KEY` is optional for local experimentation, but configuring a free
+CoinGecko Demo API key is recommended for reliable MXN-to-sats product pricing.
 
 Apply migrations, generate Prisma Client, and load demo data:
 

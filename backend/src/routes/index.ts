@@ -6,8 +6,11 @@ import { Role } from '../generated/prisma/client';
 import { asyncHandler, requireAuth, requireRole } from '../middlewares';
 import {
   ClinkService,
+  CoinGeckoService,
   addStamp,
+  archiveOwnedProduct,
   checkOwnedBusinessOffer,
+  createOwnedProduct,
   getBusinessCustomers,
   getBusinessDetail,
   getCustomerCards,
@@ -16,8 +19,11 @@ import {
   getOwnedBusinessCustomers,
   getOwnedBusinessTransactions,
   listBusinesses,
+  listOwnedProducts,
+  listPublicProducts,
   PaymentService,
   updateOwnedBusiness,
+  updateOwnedProduct,
 } from '../services';
 import { login, register, updateCustomerProfile } from '../auth';
 import { createPaymentRouter } from './payment.routes';
@@ -27,13 +33,64 @@ const clinkService = new ClinkService({
   privateKeyHex: config.clinkPrivateKey,
   timeoutSeconds: config.clinkTimeoutSeconds,
 });
-const paymentService = new PaymentService(prisma, clinkService, { addStamp });
+const coinGeckoService = new CoinGeckoService({ apiKey: config.coinGeckoApiKey });
+const paymentService = new PaymentService(
+  prisma,
+  clinkService,
+  { addStamp },
+  coinGeckoService,
+);
 
 router.post(
   '/auth/register',
   asyncHandler(async (req, res) => {
     const result = await register(req.body);
     res.status(201).json(result);
+  }),
+);
+
+router.get(
+  '/businesses/me/products',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const products = await listOwnedProducts(req.user.id);
+    res.json({ products });
+  }),
+);
+
+router.post(
+  '/businesses/me/products',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const product = await createOwnedProduct(req.user.id, req.body, coinGeckoService);
+    res.status(201).json({ product });
+  }),
+);
+
+router.patch(
+  '/businesses/me/products/:productId',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const product = await updateOwnedProduct(
+      req.user.id,
+      req.params.productId,
+      req.body,
+      coinGeckoService,
+    );
+    res.json({ product });
+  }),
+);
+
+router.delete(
+  '/businesses/me/products/:productId',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const product = await archiveOwnedProduct(req.user.id, req.params.productId);
+    res.json({ product });
   }),
 );
 
@@ -158,6 +215,14 @@ router.get(
   asyncHandler(async (req, res) => {
     const business = await getBusinessDetail(req.params.id, req.query);
     res.json({ business });
+  }),
+);
+
+router.get(
+  '/businesses/:id/products',
+  asyncHandler(async (req, res) => {
+    const products = await listPublicProducts(req.params.id);
+    res.json({ products });
   }),
 );
 

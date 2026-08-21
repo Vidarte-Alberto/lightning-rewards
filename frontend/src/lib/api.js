@@ -79,6 +79,25 @@ export const getOwnedBusinessCustomersRequest = (token) =>
 export const getOwnedBusinessTransactionsRequest = (token) =>
   apiRequest('/businesses/me/transactions', { token });
 
+export const getOwnedProductsRequest = (token) =>
+  apiRequest('/businesses/me/products', { token });
+
+export const createProductRequest = (product, token) =>
+  apiRequest('/businesses/me/products', { method: 'POST', token, body: product });
+
+export const updateProductRequest = (productId, product, token) =>
+  apiRequest(`/businesses/me/products/${encodeURIComponent(productId)}`, {
+    method: 'PATCH',
+    token,
+    body: product,
+  });
+
+export const archiveProductRequest = (productId, token) =>
+  apiRequest(`/businesses/me/products/${encodeURIComponent(productId)}`, {
+    method: 'DELETE',
+    token,
+  });
+
 export const checkOwnedBusinessOfferRequest = (token) =>
   apiRequest('/businesses/me/offer-test', { method: 'POST', token });
 
@@ -93,6 +112,9 @@ export const getCustomerClinkSetupRequest = (token) =>
 
 export const getBusinessRequest = (businessId) =>
   apiRequest(`/businesses/${encodeURIComponent(businessId)}`);
+
+export const getBusinessProductsRequest = (businessId) =>
+  apiRequest(`/businesses/${encodeURIComponent(businessId)}/products`);
 
 export const createPurchaseRequest = (purchase, token) =>
   apiRequest('/payments/purchase', {
