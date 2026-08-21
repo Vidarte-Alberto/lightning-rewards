@@ -67,6 +67,29 @@ const businesses = [
   },
 ] as const;
 
+const productsByBusiness = [
+  [
+    { name: 'House Latte', description: 'Espresso with steamed milk.', priceSats: 150 },
+    { name: 'Espresso', description: 'A double shot of house espresso.', priceSats: 100 },
+    { name: 'Croissant', description: 'Freshly baked butter croissant.', priceSats: 120 },
+  ],
+  [
+    { name: 'Taco Trio', description: 'Three street tacos with salsa.', priceSats: 180 },
+    { name: 'Single Taco', description: 'One street taco of your choice.', priceSats: 70 },
+    { name: 'Agua Fresca', description: 'Seasonal fruit drink.', priceSats: 80 },
+  ],
+  [
+    { name: 'Tube Replacement', description: 'Inner tube and installation.', priceSats: 2500 },
+    { name: 'Safety Light', description: 'Compact rechargeable bike light.', priceSats: 1800 },
+    { name: 'Basic Tune-up', description: 'Brake, gear, and tire adjustment.', priceSats: 5000 },
+  ],
+  [
+    { name: 'Paperback', description: 'One paperback from the featured shelf.', priceSats: 1200 },
+    { name: 'Bitcoin Magazine', description: 'Latest print edition.', priceSats: 700 },
+    { name: 'Coffee & Reading', description: 'House coffee with any reading session.', priceSats: 350 },
+  ],
+] as const;
+
 async function main() {
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
@@ -135,6 +158,19 @@ async function main() {
     });
 
     createdBusinesses.push(business);
+
+    for (const product of productsByBusiness[createdBusinesses.length - 1] ?? []) {
+      await prisma.product.upsert({
+        where: {
+          businessId_name: {
+            businessId: business.id,
+            name: product.name,
+          },
+        },
+        update: { ...product, isActive: true },
+        create: { ...product, businessId: business.id },
+      });
+    }
   }
 
   const progress = [2, 4];

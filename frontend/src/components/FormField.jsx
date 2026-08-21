@@ -1,4 +1,4 @@
-function FormField({ id, label, type = 'text', value, onChange, required, placeholder, min, minLength, pattern, autoComplete }) {
+function FormField({ id, label, type = 'text', value, onChange, required, placeholder, min, max, step, minLength, maxLength, pattern, autoComplete }) {
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-neutral-300">{label}</label>
@@ -8,7 +8,10 @@ function FormField({ id, label, type = 'text', value, onChange, required, placeh
         required={required}
         placeholder={placeholder}
         min={min}
+        max={max}
+        step={step}
         minLength={minLength}
+        maxLength={maxLength}
         pattern={pattern}
         autoComplete={autoComplete}
         value={value}

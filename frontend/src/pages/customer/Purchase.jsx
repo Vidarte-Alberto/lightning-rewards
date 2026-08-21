@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import FormField from '../../components/FormField';
 import { useAuth } from '../../context/AuthContext';
-import { createPurchaseRequest, getBusinessRequest } from '../../lib/api';
+import {
+  createPurchaseRequest,
+  getBusinessProductsRequest,
+  getBusinessRequest,
+} from '../../lib/api';
 
 const newIdempotencyKey = () => {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -12,10 +16,21 @@ const newIdempotencyKey = () => {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
+const productPriceLabel = (product) => {
+  if (product.priceCurrency === 'MXN') {
+    return new Intl.NumberFormat('en-MX', { style: 'currency', currency: 'MXN' })
+      .format(product.priceMxnCents / 100);
+  }
+  return `${product.priceSats.toLocaleString()} sats`;
+};
+
 function Purchase() {
   const { businessId } = useParams();
   const { user, token } = useAuth();
   const [business, setBusiness] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [purchaseMode, setPurchaseMode] = useState('custom');
+  const [selectedProductId, setSelectedProductId] = useState(null);
   const [amountSats, setAmountSats] = useState('1000');
   const [status, setStatus] = useState('loading');
   const [result, setResult] = useState(null);
@@ -27,10 +42,18 @@ function Purchase() {
   useEffect(() => {
     let active = true;
 
-    getBusinessRequest(businessId)
-      .then((response) => {
+    Promise.all([
+      getBusinessRequest(businessId),
+      getBusinessProductsRequest(businessId),
+    ])
+      .then(([businessResponse, productsResponse]) => {
         if (!active) return;
-        setBusiness(response.business);
+        setBusiness(businessResponse.business);
+        setProducts(productsResponse.products);
+        if (productsResponse.products.length > 0) {
+          setPurchaseMode('product');
+          setSelectedProductId(productsResponse.products[0].id);
+        }
         setStatus('form');
       })
       .catch((requestError) => {
@@ -54,7 +77,9 @@ function Purchase() {
       const purchaseResult = await createPurchaseRequest(
         {
           businessId,
-          amountSats: Number(amountSats),
+          ...(purchaseMode === 'product'
+            ? { productId: selectedProductId }
+            : { amountSats: Number(amountSats) }),
           idempotencyKey,
         },
         token,
@@ -116,7 +141,12 @@ function Purchase() {
     return (
       <div className="max-w-md py-16 text-center">
         <h1 className="text-2xl font-bold text-neutral-50">Payment confirmed</h1>
-        <p className="mt-2 text-neutral-400">You earned a stamp at {business.name}.</p>
+        <p className="mt-2 text-neutral-400">
+          {result.transaction.productName
+            ? `${result.transaction.productName} was paid successfully. `
+            : 'Your payment was confirmed. '}
+          You earned a stamp at {business.name}.
+        </p>
         {result.loyalty?.rewardUnlocked && (
           <p className="mt-4 text-lg font-semibold text-accent-soft">
             🎉 Reward unlocked: {result.loyalty.reward.description}
@@ -194,22 +224,77 @@ function Purchase() {
         {business.rewardDescription} every {business.stampsRequired} stamps.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <FormField
-          id="amountSats"
-          label="Amount (sats)"
-          type="number"
-          min="1"
-          step="1"
-          required
-          value={amountSats}
-          onChange={(event) => setAmountSats(event.target.value)}
-        />
+      <div className="mt-6 flex rounded-full border border-white/10 bg-white/[0.035] p-1" role="tablist" aria-label="Purchase type">
+        {products.length > 0 && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={purchaseMode === 'product'}
+            onClick={() => setPurchaseMode('product')}
+            className={`min-h-10 flex-1 rounded-full px-4 py-2 text-sm font-extrabold transition-colors ${purchaseMode === 'product' ? 'bg-accent text-neutral-900' : 'text-neutral-400 hover:text-neutral-50'}`}
+          >
+            Products
+          </button>
+        )}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={purchaseMode === 'custom'}
+          onClick={() => setPurchaseMode('custom')}
+          className={`min-h-10 flex-1 rounded-full px-4 py-2 text-sm font-extrabold transition-colors ${purchaseMode === 'custom' ? 'bg-accent text-neutral-900' : 'text-neutral-400 hover:text-neutral-50'}`}
+        >
+          Custom amount
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+        {purchaseMode === 'product' ? (
+          <fieldset>
+            <legend className="mb-3 text-sm font-medium text-neutral-300">Choose a product</legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {products.map((product) => {
+                const selected = selectedProductId === product.id;
+                return (
+                  <label key={product.id} className={`cursor-pointer rounded-[1.25rem] border p-4 shadow-[inset_0_1px_rgba(255,255,255,0.04)] transition-all ${selected ? 'border-accent/60 bg-accent/10' : 'border-white/10 bg-white/[0.035] hover:-translate-y-0.5 hover:border-white/20'}`}>
+                    <input
+                      type="radio"
+                      name="product"
+                      value={product.id}
+                      checked={selected}
+                      onChange={() => setSelectedProductId(product.id)}
+                      className="sr-only"
+                    />
+                    <span className="block font-semibold text-neutral-50">{product.name}</span>
+                    {product.description && <span className="mt-1 block text-sm text-neutral-400">{product.description}</span>}
+                    <span className="mt-3 block font-bold text-accent-soft">{productPriceLabel(product)}</span>
+                    {product.priceCurrency === 'MXN' && (
+                      <span className="mt-1 block text-xs text-neutral-500">≈ {product.priceSats.toLocaleString()} sats; refreshed at checkout</span>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : (
+          <FormField
+            id="amountSats"
+            label="Amount (sats)"
+            type="number"
+            min="1"
+            step="1"
+            required
+            value={amountSats}
+            onChange={(event) => setAmountSats(event.target.value)}
+          />
+        )}
         <button
           type="submit"
-          className="inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5"
+          disabled={purchaseMode === 'product' && !selectedProductId}
+          className="inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
         >
-          Pay with Lightning
+          {purchaseMode === 'product' && selectedProductId
+            ? `Pay ${productPriceLabel(products.find((product) => product.id === selectedProductId))}`
+            : 'Pay with Lightning'}
         </button>
       </form>
     </div>

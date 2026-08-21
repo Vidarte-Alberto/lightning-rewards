@@ -30,6 +30,11 @@ enum RewardStatus {
   REDEEMED
 }
 
+enum ProductPriceCurrency {
+  SATS
+  MXN
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -62,8 +67,30 @@ model Business {
 
   loyaltyCards LoyaltyCard[]
   transactions Transaction[]
+  products     Product[]
 
   @@index([category, isActive])
+}
+
+model Product {
+  id             String               @id @default(uuid())
+  businessId     String
+  business       Business             @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  name           String
+  description    String?
+  priceCurrency  ProductPriceCurrency @default(SATS)
+  priceSats      Int
+  priceMxnCents  Int?
+  lastBtcMxnRate Decimal?             @db.Decimal(18, 2)
+  rateUpdatedAt  DateTime?
+  isActive       Boolean              @default(true)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  transactions Transaction[]
+
+  @@unique([businessId, name])
+  @@index([businessId, isActive, name])
 }
 
 model LoyaltyCard {
@@ -82,27 +109,34 @@ model LoyaltyCard {
 }
 
 model Transaction {
-  id               String            @id @default(uuid())
-  idempotencyKey   String            @unique
-  businessId       String
-  business         Business          @relation(fields: [businessId], references: [id], onDelete: Restrict)
-  customerId       String
-  customer         User              @relation("CustomerTransactions", fields: [customerId], references: [id], onDelete: Restrict)
-  amountSats       Int
-  bolt11           String?           @unique
-  preimage         String?           @unique
-  status           TransactionStatus @default(PENDING)
-  failureCode      String?
-  failureMessage   String?
-  paidAt           DateTime?
-  loyaltyGrantedAt DateTime?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id                   String                @id @default(uuid())
+  idempotencyKey       String                @unique
+  businessId           String
+  business             Business              @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  customerId           String
+  customer             User                  @relation("CustomerTransactions", fields: [customerId], references: [id], onDelete: Restrict)
+  productId            String?
+  product              Product?              @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productName          String?
+  productPriceCurrency ProductPriceCurrency?
+  productPriceMxnCents Int?
+  btcMxnRate           Decimal?              @db.Decimal(18, 2)
+  amountSats           Int
+  bolt11               String?               @unique
+  preimage             String?               @unique
+  status               TransactionStatus     @default(PENDING)
+  failureCode          String?
+  failureMessage       String?
+  paidAt               DateTime?
+  loyaltyGrantedAt     DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
   reward Reward?
 
   @@index([businessId, createdAt])
   @@index([customerId, createdAt])
+  @@index([productId])
   @@index([status, createdAt])
 }
 

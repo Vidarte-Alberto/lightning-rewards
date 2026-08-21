@@ -3,6 +3,7 @@ DATABASE_URL="postgresql://user@localhost:5432/lightning_rewards?schema=public"
 JWT_SECRET='replace-with-a-random-secret'
 CLINK_PRIVATE_KEY='replace-with-a-64-character-hex-private-key'
 CLINK_TIMEOUT_SECONDS=30
+COINGECKO_API_KEY='optional-demo-api-key'
 
 # Optional real CLINK pointers used by `npm run db:seed` for a live demo.
 DEMO_CUSTOMER_NDEBIT=''

@@ -9,6 +9,7 @@ const CUSTOMER_LINKS = [
 
 const BUSINESS_LINKS = [
   { to: '/business/dashboard', label: 'Dashboard' },
+  { to: '/business/products', label: 'Products' },
   { to: '/business/transactions', label: 'Transactions' },
   { to: '/business/settings', label: 'Settings' },
 ];

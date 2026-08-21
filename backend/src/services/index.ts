@@ -6,3 +6,5 @@ export * from './business.service';
 export * from './business-offer.service';
 export * from './loyalty.service';
 export * from './customer-clink.service';
+export * from './product.service';
+export * from './coingecko.service';

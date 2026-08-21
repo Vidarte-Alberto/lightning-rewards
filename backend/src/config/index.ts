@@ -22,6 +22,7 @@ const config = {
   databaseUrl,
   clinkPrivateKey: process.env.CLINK_PRIVATE_KEY,
   clinkTimeoutSeconds,
+  coinGeckoApiKey: process.env.COINGECKO_API_KEY,
   jwtSecret,
 };
 

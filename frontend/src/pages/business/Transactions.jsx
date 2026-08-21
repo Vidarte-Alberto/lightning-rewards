@@ -51,6 +51,7 @@ function Transactions() {
               <tr className="border-b border-white/10 text-left text-neutral-500">
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Customer</th>
+                <th className="px-4 py-3 font-medium">Product</th>
                 <th className="px-4 py-3 font-medium">Amount</th>
                 <th className="px-4 py-3 font-medium">Status</th>
               </tr>
@@ -60,6 +61,7 @@ function Transactions() {
                 <tr key={transaction.id} className="border-b border-white/6 last:border-0">
                   <td className="px-4 py-3 text-neutral-400">{new Date(transaction.createdAt).toLocaleString()}</td>
                   <td className="px-4 py-3 text-neutral-400">{transaction.customer.email}</td>
+                  <td className="px-4 py-3 text-neutral-400">{transaction.productName || 'Custom amount'}</td>
                   <td className="px-4 py-3 text-neutral-50">{transaction.amountSats} sats</td>
                   <td className={`px-4 py-3 font-medium ${STATUS_STYLES[transaction.status]}`}>{transaction.status}</td>
                 </tr>

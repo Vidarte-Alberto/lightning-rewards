@@ -193,6 +193,7 @@ test('rejects a non-ndebit value before updating the customer wallet', async () 
 test('completes a real purchase and shows the awarded stamp', async () => {
   fetch
     .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(jsonResponse({ products: [] }))
     .mockResolvedValueOnce(
       jsonResponse({
         outcome: 'paid',
@@ -213,10 +214,10 @@ test('completes a real purchase and shows the awarded stamp', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Pay with Lightning' }));
 
   expect(await screen.findByRole('heading', { name: 'Payment confirmed' })).toBeInTheDocument();
-  expect(screen.getByText('You earned a stamp at Lightning Cafe.')).toBeInTheDocument();
+  expect(screen.getByText(/You earned a stamp at Lightning Cafe\./)).toBeInTheDocument();
   expect(screen.getByText('4/5 stamps collected')).toBeInTheDocument();
 
-  const purchaseCall = fetch.mock.calls[1];
+  const purchaseCall = fetch.mock.calls[2];
   expect(purchaseCall[0]).toBe('http://localhost:3000/payments/purchase');
   expect(purchaseCall[1]).toEqual(
     expect.objectContaining({
@@ -234,6 +235,7 @@ test('completes a real purchase and shows the awarded stamp', async () => {
 test('tells the customer to open ShockWallet while approval is pending', async () => {
   fetch
     .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(jsonResponse({ products: [] }))
     .mockImplementationOnce(() => new Promise(() => undefined));
 
   renderCustomerRoute('/customer/purchase/business-id');
@@ -249,6 +251,7 @@ test('tells the customer to open ShockWallet while approval is pending', async (
 test('shows a reward when the confirmed payment completes the loyalty card', async () => {
   fetch
     .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(jsonResponse({ products: [] }))
     .mockResolvedValueOnce(
       jsonResponse({
         outcome: 'paid',
@@ -272,6 +275,7 @@ test('shows a reward when the confirmed payment completes the loyalty card', asy
 test('distinguishes a declined wallet approval from a technical failure', async () => {
   fetch
     .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(jsonResponse({ products: [] }))
     .mockResolvedValueOnce(
       jsonResponse(
         {
@@ -296,8 +300,51 @@ test('distinguishes a declined wallet approval from a technical failure', async 
   expect(screen.getByRole('button', { name: 'Try payment again' })).toBeInTheDocument();
 });
 
+test('pays for a selected product without trusting a client-side amount', async () => {
+  const product = {
+    id: 'latte-id',
+    name: 'House Latte',
+    description: 'Espresso with steamed milk.',
+    priceSats: 150,
+    isActive: true,
+  };
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(jsonResponse({ products: [product] }))
+    .mockResolvedValueOnce(jsonResponse({
+      outcome: 'paid',
+      transaction: {
+        id: 'product-transaction-id',
+        status: 'PAID',
+        amountSats: 150,
+        productId: product.id,
+        productName: product.name,
+      },
+      loyalty: {
+        card: { id: 'card-id', currentStamps: 1, totalStampsEver: 1 },
+        reward: null,
+        rewardUnlocked: false,
+        stampsRequired: 5,
+      },
+    }));
+
+  renderCustomerRoute('/customer/purchase/business-id');
+
+  expect(await screen.findByText('House Latte')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Pay 150 sats' }));
+
+  expect(await screen.findByRole('heading', { name: 'Payment confirmed' })).toBeInTheDocument();
+  expect(JSON.parse(fetch.mock.calls[2][1].body)).toEqual({
+    businessId: 'business-id',
+    productId: 'latte-id',
+    idempotencyKey: expect.any(String),
+  });
+});
+
 test('requires a connected wallet before starting a purchase', async () => {
-  fetch.mockResolvedValueOnce(jsonResponse({ business }));
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(jsonResponse({ products: [] }));
 
   renderCustomerRoute('/customer/purchase/business-id', null);
 
@@ -308,5 +355,5 @@ test('requires a connected wallet before starting a purchase', async () => {
     'href',
     '/customer/wallet',
   );
-  await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
 });

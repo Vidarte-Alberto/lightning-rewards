@@ -1,4 +1,5 @@
 import {
+  ProductPriceCurrency,
   Role,
   TransactionStatus,
   type PrismaClient,
@@ -8,12 +9,23 @@ import { ClinkServiceError } from './clink.errors';
 import type { DebitPaymentResult } from './clink.service';
 import type { LoyaltyResult } from './loyalty.service';
 import { PaymentServiceError } from './payment.errors';
+import type { MxnPriceConverter } from './coingecko.service';
 
 export type PurchaseInput = {
   businessId: string;
   customerId: string;
-  amountSats: number;
+  amountSats?: number;
+  productId?: string;
   idempotencyKey: string;
+};
+
+type ResolvedPurchase = Omit<PurchaseInput, 'amountSats' | 'productId'> & {
+  amountSats: number;
+  productId: string | null;
+  productName: string | null;
+  productPriceCurrency: ProductPriceCurrency | null;
+  productPriceMxnCents: number | null;
+  btcMxnRate: number | null;
 };
 
 export type PurchaseOutcome = 'paid' | 'denied' | 'failed' | 'unknown' | 'pending';
@@ -60,6 +72,7 @@ export class PaymentService {
     private readonly prisma: PrismaClient,
     private readonly clink: ClinkPaymentPort,
     private readonly loyalty?: LoyaltyPort,
+    private readonly mxnConverter?: MxnPriceConverter,
   ) {}
 
   async purchase(input: PurchaseInput): Promise<PurchaseResult> {
@@ -98,19 +111,22 @@ export class PaymentService {
       );
     }
 
-    const pendingTransaction = await this.createPendingTransaction(input);
+    const resolvedPurchase = await this.resolvePurchase(input);
+    const pendingTransaction = await this.createPendingTransaction(resolvedPurchase);
     if (!pendingTransaction.created) {
       return this.existingResult(pendingTransaction.transaction, input);
     }
 
     const transaction = pendingTransaction.transaction;
-    const description = `Purchase at ${business.name}`.slice(0, 100);
+    const description = resolvedPurchase.productName
+      ? `${resolvedPurchase.productName} at ${business.name}`.slice(0, 100)
+      : `Purchase at ${business.name}`.slice(0, 100);
 
     let bolt11: string;
     try {
       bolt11 = await this.requestInvoiceWithRetry(
         business.nofferString,
-        input.amountSats,
+        resolvedPurchase.amountSats,
         description,
       );
     } catch (error: unknown) {
@@ -127,7 +143,7 @@ export class PaymentService {
       payment = await this.clink.requestDebitPayment(
         customer.ndebitString,
         bolt11,
-        input.amountSats,
+        resolvedPurchase.amountSats,
         description,
       );
     } catch (error: unknown) {
@@ -155,8 +171,22 @@ export class PaymentService {
       throw new PaymentServiceError('INVALID_CUSTOMER_ID', 'The customer is required.', 400);
     }
 
-    if (!Number.isSafeInteger(input.amountSats) || input.amountSats <= 0 || input.amountSats > 2_147_483_647) {
+    const hasAmount = input.amountSats !== undefined;
+    const hasProduct = input.productId !== undefined;
+    if (hasAmount === hasProduct) {
+      throw new PaymentServiceError(
+        'INVALID_PURCHASE_SELECTION',
+        'Choose either a product or a custom amount.',
+        400,
+      );
+    }
+
+    if (hasAmount && (!Number.isSafeInteger(input.amountSats) || Number(input.amountSats) <= 0 || Number(input.amountSats) > 2_147_483_647)) {
       throw new PaymentServiceError('INVALID_AMOUNT', 'The amount must be a positive integer in sats.', 400);
+    }
+
+    if (hasProduct && !input.productId?.trim()) {
+      throw new PaymentServiceError('INVALID_PRODUCT_ID', 'The product is required.', 400);
     }
 
     const idempotencyKey = input.idempotencyKey.trim();
@@ -169,7 +199,86 @@ export class PaymentService {
     }
   }
 
-  private async createPendingTransaction(input: PurchaseInput) {
+  private async resolvePurchase(input: PurchaseInput): Promise<ResolvedPurchase> {
+    if (input.productId) {
+      const product = await this.prisma.product.findFirst({
+        where: {
+          id: input.productId,
+          businessId: input.businessId,
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          priceCurrency: true,
+          priceSats: true,
+          priceMxnCents: true,
+        },
+      });
+
+      if (!product) {
+        throw new PaymentServiceError(
+          'PRODUCT_NOT_AVAILABLE',
+          'The selected product is not available.',
+          404,
+        );
+      }
+
+      let amountSats = product.priceSats;
+      let btcMxnRate: number | null = null;
+      if (product.priceCurrency === ProductPriceCurrency.MXN) {
+        if (!product.priceMxnCents || !this.mxnConverter) {
+          throw new PaymentServiceError(
+            'EXCHANGE_RATE_UNAVAILABLE',
+            'The BTC/MXN exchange rate is temporarily unavailable.',
+            503,
+          );
+        }
+
+        try {
+          const conversion = await this.mxnConverter.convertMxnToSats(product.priceMxnCents);
+          amountSats = conversion.amountSats;
+          btcMxnRate = conversion.btcMxnRate;
+          await this.prisma.product.update({
+            where: { id: product.id },
+            data: {
+              priceSats: conversion.amountSats,
+              lastBtcMxnRate: conversion.btcMxnRate,
+              rateUpdatedAt: conversion.rateUpdatedAt,
+            },
+          });
+        } catch {
+          throw new PaymentServiceError(
+            'EXCHANGE_RATE_UNAVAILABLE',
+            'The BTC/MXN exchange rate is temporarily unavailable.',
+            503,
+          );
+        }
+      }
+
+      return {
+        ...input,
+        amountSats,
+        productId: product.id,
+        productName: product.name,
+        productPriceCurrency: product.priceCurrency,
+        productPriceMxnCents: product.priceMxnCents,
+        btcMxnRate,
+      };
+    }
+
+    return {
+      ...input,
+      amountSats: input.amountSats as number,
+      productId: null,
+      productName: null,
+      productPriceCurrency: null,
+      productPriceMxnCents: null,
+      btcMxnRate: null,
+    };
+  }
+
+  private async createPendingTransaction(input: ResolvedPurchase) {
     try {
       return {
         transaction: await this.prisma.transaction.create({
@@ -178,6 +287,11 @@ export class PaymentService {
             businessId: input.businessId,
             customerId: input.customerId,
             amountSats: input.amountSats,
+            productId: input.productId,
+            productName: input.productName,
+            productPriceCurrency: input.productPriceCurrency,
+            productPriceMxnCents: input.productPriceMxnCents,
+            btcMxnRate: input.btcMxnRate,
           },
         }),
         created: true,
@@ -230,11 +344,15 @@ export class PaymentService {
     };
   }
 
-  private assertSamePurchase(transaction: Transaction, input: PurchaseInput) {
+  private assertSamePurchase(
+    transaction: Transaction,
+    input: PurchaseInput | ResolvedPurchase,
+  ) {
     if (
       transaction.businessId !== input.businessId ||
       transaction.customerId !== input.customerId ||
-      transaction.amountSats !== input.amountSats
+      transaction.productId !== (input.productId ?? null) ||
+      (!input.productId && transaction.amountSats !== input.amountSats)
     ) {
       throw new PaymentServiceError(
         'IDEMPOTENCY_CONFLICT',
