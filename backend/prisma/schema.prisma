@@ -4,10 +4,114 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  BUSINESS
+  CUSTOMER
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum RewardStatus {
+  AVAILABLE
+  REDEEMED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  ndebitString String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  business     Business?
+  loyaltyCards LoyaltyCard[]
+  transactions Transaction[] @relation("CustomerTransactions")
+}
+
+model Business {
+  id                String   @id @default(uuid())
+  ownerId           String   @unique
+  owner             User     @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  name              String
+  category          String
+  logoUrl           String?
+  description       String?
+  nofferString      String
+  stampsRequired    Int      @default(5)
+  rewardDescription String
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  loyaltyCards LoyaltyCard[]
+  transactions Transaction[]
+
+  @@index([category, isActive])
+}
+
+model LoyaltyCard {
+  id              String   @id @default(uuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  customerId      String
+  customer        User     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  currentStamps   Int      @default(0)
+  totalStampsEver Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([businessId, customerId])
+  @@index([customerId])
+}
+
+model Transaction {
+  id             String            @id @default(uuid())
+  idempotencyKey String            @unique
+  businessId     String
+  business       Business          @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  customerId     String
+  customer       User              @relation("CustomerTransactions", fields: [customerId], references: [id], onDelete: Restrict)
+  amountSats     Int
+  bolt11         String?           @unique
+  preimage       String?           @unique
+  status         TransactionStatus @default(PENDING)
+  failureCode    String?
+  failureMessage String?
+  paidAt         DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  reward Reward?
+
+  @@index([businessId, createdAt])
+  @@index([customerId, createdAt])
+  @@index([status, createdAt])
+}
+
+model Reward {
+  id            String       @id @default(uuid())
+  transactionId String       @unique
+  transaction   Transaction  @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  description   String
+  status        RewardStatus @default(AVAILABLE)
+  earnedAt      DateTime     @default(now())
+  redeemedAt    DateTime?
+
+  @@index([status, earnedAt])
 }

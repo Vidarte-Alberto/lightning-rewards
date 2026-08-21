@@ -6,11 +6,12 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p prisma/tsconfig.json && tsc -p tsconfig.test.json",
     "lint": "eslint .",
     "cov:clean": "rimraf .nyc_output && rimraf coverage",
     "cov:unit": "jest --forceExit --colors -c jest.config.unit.js",
-    "test:unit": "npm-run-all cov:clean cov:unit"
+    "test:unit": "npm-run-all cov:clean cov:unit",
+    "test:integration": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --colors -c jest.config.integration.js"
   },
   "keywords": [],
   "author": "",
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@eslint/js": "^9.26.0",
     "@jest/globals": "^29.7.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.25",
     "@types/jest": "^29.5.14",
