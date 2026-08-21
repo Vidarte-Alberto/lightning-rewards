@@ -22,6 +22,7 @@ enum TransactionStatus {
   PENDING
   PAID
   FAILED
+  UNKNOWN
 }
 
 enum RewardStatus {

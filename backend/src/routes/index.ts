@@ -1,11 +1,24 @@
 import { Router } from 'express';
 
-import { login, register, updateCustomerProfile } from '../auth';
-import { asyncHandler, requireAuth, requireRole } from '../middlewares';
+import config from '../config';
+import prisma from '../db/prisma';
 import { Role } from '../generated/prisma/client';
-import { getBusinessCustomers, getCustomerCards } from '../services';
+import { asyncHandler, requireAuth, requireRole } from '../middlewares';
+import {
+  ClinkService,
+  getBusinessCustomers,
+  getCustomerCards,
+  PaymentService,
+} from '../services';
+import { login, register, updateCustomerProfile } from '../auth';
+import { createPaymentRouter } from './payment.routes';
 
 const router = Router();
+const clinkService = new ClinkService({
+  privateKeyHex: config.clinkPrivateKey,
+  timeoutSeconds: config.clinkTimeoutSeconds,
+});
+const paymentService = new PaymentService(prisma, clinkService);
 
 router.post(
   '/auth/register',
@@ -31,6 +44,13 @@ router.patch(
     const user = await updateCustomerProfile(req.user.id, req.body);
     res.json({ user });
   }),
+);
+
+router.use(
+  '/payments',
+  requireAuth,
+  requireRole(Role.CUSTOMER),
+  createPaymentRouter(paymentService),
 );
 
 router.get(
