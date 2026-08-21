@@ -1,7 +1,7 @@
 function FormField({ id, label, type = 'text', value, onChange, required, placeholder, min, minLength, pattern, autoComplete }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-neutral-700">{label}</label>
+      <label htmlFor={id} className="block text-sm font-medium text-neutral-300">{label}</label>
       <input
         id={id}
         type={type}
@@ -13,7 +13,7 @@ function FormField({ id, label, type = 'text', value, onChange, required, placeh
         autoComplete={autoComplete}
         value={value}
         onChange={onChange}
-        className="mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
+        className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 text-white placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:border-amber-500"
       />
     </div>
   );

@@ -18,31 +18,31 @@ function AppLayout() {
   const links = user?.role === 'BUSINESS' ? BUSINESS_LINKS : CUSTOMER_LINKS;
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+    <div className="min-h-screen bg-neutral-950 bg-[radial-gradient(circle_at_88%_0%,rgba(245,165,36,0.08),transparent_28rem)]">
+      <header className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur">
         <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-4">
-            <span className="font-semibold text-neutral-900">Lightning Rewards</span>
-            <div className="flex min-w-0 items-center gap-3 text-sm text-neutral-600">
-              <span className="hidden max-w-56 truncate text-neutral-400 lg:inline" title={user?.email}>
+            <span className="font-semibold text-white">Lightning Rewards</span>
+            <div className="flex min-w-0 items-center gap-3 text-sm text-neutral-400">
+              <span className="hidden max-w-56 truncate text-neutral-500 lg:inline" title={user?.email}>
                 {user?.email}
               </span>
               <button
                 type="button"
                 onClick={logout}
-                className="whitespace-nowrap rounded-lg border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-900 sm:px-4"
+                className="whitespace-nowrap rounded-lg border border-neutral-700 px-3 py-2 text-sm font-medium text-white transition-colors hover:border-amber-500 hover:text-amber-400 sm:px-4"
               >
                 Log out
               </button>
             </div>
           </div>
-          <nav aria-label="Primary" className="mt-3 flex gap-5 overflow-x-auto pb-1 text-sm text-neutral-600 sm:mt-4 sm:gap-6">
+          <nav aria-label="Primary" className="mt-3 flex gap-5 overflow-x-auto pb-1 text-sm text-neutral-400 sm:mt-4 sm:gap-6">
             {links.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 className={({ isActive }) =>
-                  `whitespace-nowrap ${isActive ? 'font-medium text-neutral-900' : 'hover:text-neutral-900'}`
+                  `whitespace-nowrap ${isActive ? 'font-medium text-amber-400' : 'hover:text-white'}`
                 }
               >
                 {link.label}
