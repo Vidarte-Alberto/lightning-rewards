@@ -6,12 +6,12 @@ module.exports = {
     '**/*.unit.test.{js,ts}'
   ],
   collectCoverageFrom: [
-    '**/db/**/*.js',
-    '**/libs/**/*.js',
-    '**/middlewares/**/*.js',
-    '**/routes/**/*.js',
-    '**/services/**/*.js',
-    '**/utils/**/*.js'
+    '**/db/**/*.ts',
+    '**/libs/**/*.ts',
+    '**/middlewares/**/*.ts',
+    '**/routes/**/*.ts',
+    '**/services/**/*.ts',
+    '**/utils/**/*.ts'
   ],
   coverageDirectory: 'coverage/unit'
 };
