@@ -107,6 +107,15 @@ export const getCustomerBusinessesRequest = (token) =>
 export const getCustomerCardsRequest = (token) =>
   apiRequest('/customers/me/cards', { token });
 
+export const getCustomerRewardsRequest = (token) =>
+  apiRequest('/customers/me/rewards', { token });
+
+export const redeemCustomerRewardRequest = (rewardId, token) =>
+  apiRequest(`/customers/me/rewards/${encodeURIComponent(rewardId)}/redeem`, {
+    method: 'POST',
+    token,
+  });
+
 export const getCustomerClinkSetupRequest = (token) =>
   apiRequest('/customers/me/clink-setup', { token });
 

@@ -15,6 +15,7 @@ import {
   getBusinessDetail,
   getCustomerCards,
   getCustomerClinkSetup,
+  getCustomerRewards,
   getOwnedBusiness,
   getOwnedBusinessCustomers,
   getOwnedBusinessTransactions,
@@ -22,6 +23,7 @@ import {
   listOwnedProducts,
   listPublicProducts,
   PaymentService,
+  redeemCustomerReward,
   updateOwnedBusiness,
   updateOwnedProduct,
 } from '../services';
@@ -132,6 +134,26 @@ router.get(
   asyncHandler(async (req, res) => {
     const cards = await getCustomerCards(req.user.id);
     res.json({ cards });
+  }),
+);
+
+router.get(
+  '/customers/me/rewards',
+  requireAuth,
+  requireRole(Role.CUSTOMER),
+  asyncHandler(async (req, res) => {
+    const rewards = await getCustomerRewards(req.user.id);
+    res.json({ rewards });
+  }),
+);
+
+router.post(
+  '/customers/me/rewards/:rewardId/redeem',
+  requireAuth,
+  requireRole(Role.CUSTOMER),
+  asyncHandler(async (req, res) => {
+    const reward = await redeemCustomerReward(req.user.id, req.params.rewardId);
+    res.json({ reward });
   }),
 );
 

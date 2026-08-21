@@ -8,3 +8,4 @@ export * from './loyalty.service';
 export * from './customer-clink.service';
 export * from './product.service';
 export * from './coingecko.service';
+export * from './reward.service';
