@@ -1,1 +1,1 @@
-// Your services.
+export * from './loyalty.service';
