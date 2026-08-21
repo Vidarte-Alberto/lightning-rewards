@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Brand from '../components/Brand';
 import PresentationControls from '../components/presentation/PresentationControls';
 import { PRESENTATION_SLIDES } from '../components/presentation/slides';
 import './presentation.css';
@@ -107,7 +107,7 @@ function Presentation() {
       <div className="presentation-orb presentation-orb-two" />
 
       <header className="presentation-topbar">
-        <Link to="/" className="presentation-brand">Lightning Rewards</Link>
+        <Brand className="presentation-brand" />
         <div>
           <span>{String(current + 1).padStart(2, '0')} / {String(PRESENTATION_SLIDES.length).padStart(2, '0')}</span>
           <span className="presentation-pitch-label">Hackathon pitch</span>

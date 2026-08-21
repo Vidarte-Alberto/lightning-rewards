@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Brand from './Brand';
 
 const CUSTOMER_LINKS = [
   { to: '/customer/discover', label: 'Discover' },
@@ -23,9 +24,7 @@ function AppLayout() {
       <header className="border-b border-white/10 bg-ink/80 backdrop-blur">
         <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-4">
-            <span className="flex items-center gap-2 font-semibold text-neutral-50">
-              <span aria-hidden="true">🥇</span> Lightning Rewards
-            </span>
+            <Brand />
             <div className="flex min-w-0 items-center gap-3 text-sm text-neutral-400">
               <span className="hidden max-w-56 truncate text-neutral-500 lg:inline" title={user?.email}>
                 {user?.email}
