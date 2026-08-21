@@ -1,4 +1,8 @@
 import { ClinkServiceError, debitResponseError, offerResponseError } from './clink.errors';
+import {
+  CompatibleClinkClient,
+  type ClinkCryptoModule,
+} from './clink.transport';
 
 type NofferResponse =
   | { bolt11: string }
@@ -52,7 +56,7 @@ export type ClinkSdkModule = {
     k1?: string,
     description?: string,
   ): NdebitData;
-};
+} & Partial<ClinkCryptoModule>;
 
 type ClinkModuleLoader = () => Promise<ClinkSdkModule>;
 
@@ -71,6 +75,17 @@ const defaultModuleLoader: ClinkModuleLoader = async () => {
   const module = await import('@shocknet/clink-sdk');
   return module as unknown as ClinkSdkModule;
 };
+
+const supportsCompatibleTransport = (
+  sdkModule: ClinkSdkModule,
+): sdkModule is ClinkSdkModule & ClinkCryptoModule =>
+  typeof sdkModule.SimplePool === 'function' &&
+  typeof sdkModule.getPublicKey === 'function' &&
+  typeof sdkModule.finalizeEvent === 'function' &&
+  typeof sdkModule.verifyEvent === 'function' &&
+  typeof sdkModule.nip44?.getConversationKey === 'function' &&
+  typeof sdkModule.nip44.encrypt === 'function' &&
+  typeof sdkModule.nip44.decrypt === 'function';
 
 const normalizeDescription = (description?: string) => {
   if (!description) return undefined;
@@ -119,7 +134,7 @@ export class ClinkService {
   ): Promise<string> {
     const sdkModule = await this.loadModule();
     const pointer = this.decodePointer(sdkModule, nofferString, 'noffer');
-    const client = new sdkModule.ClinkSDK({
+    const client = this.createClient(sdkModule, {
       privateKey: privateKeyFromHex(this.privateKeyHex),
       relays: [pointer.relay],
       toPubKey: pointer.pubkey,
@@ -155,7 +170,7 @@ export class ClinkService {
   ): Promise<DebitPaymentResult> {
     const sdkModule = await this.loadModule();
     const pointer = this.decodePointer(sdkModule, ndebitString, 'ndebit');
-    const client = new sdkModule.ClinkSDK({
+    const client = this.createClient(sdkModule, {
       privateKey: privateKeyFromHex(this.privateKeyHex),
       relays: [pointer.relay],
       toPubKey: pointer.pubkey,
@@ -234,5 +249,22 @@ export class ClinkService {
       indeterminate: operation === 'debit',
       cause,
     });
+  }
+
+  private createClient(
+    sdkModule: ClinkSdkModule,
+    settings: {
+      privateKey: Uint8Array;
+      relays: string[];
+      toPubKey: string;
+      defaultTimeoutSeconds: number;
+    },
+  ): ClinkClient {
+    if (supportsCompatibleTransport(sdkModule)) {
+      return new CompatibleClinkClient(sdkModule, settings) as ClinkClient;
+    }
+
+    // Test doubles and older SDK builds can continue through the public client.
+    return new sdkModule.ClinkSDK(settings);
   }
 }
