@@ -1,0 +1,4 @@
+PORT=3000
+DATABASE_URL="postgresql://user@localhost:5432/lightning_rewards?schema=public"
+API_KEY=''
+JWT_SECRET=''
