@@ -43,24 +43,24 @@ function Dashboard() {
   if (error || !business) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-white">Business dashboard</h1>
-        <p className="mt-4 text-red-400">{error || 'Business profile not found.'}</p>
+        <h1 className="text-2xl font-bold text-neutral-50">Business dashboard</h1>
+        <p className="mt-4 text-danger">{error || 'Business profile not found.'}</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white">{business.name}</h1>
+      <h1 className="text-2xl font-bold text-neutral-50">{business.name}</h1>
       <p className="text-neutral-400">{customers.length} customer{customers.length === 1 ? '' : 's'} enrolled</p>
 
       {customers.length === 0 ? (
         <p className="mt-8 text-neutral-500">No customers yet — once someone buys something, they&apos;ll show up here.</p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900/60">
-          <table className="min-w-[36rem] w-full text-sm">
+        <div className="mt-6 overflow-x-auto rounded-[1.25rem] border border-white/10 bg-white/[0.035] shadow-[inset_0_1px_rgba(255,255,255,0.04)]">
+          <table className="min-w-xl w-full text-sm">
             <thead>
-              <tr className="border-b border-neutral-800 text-left text-neutral-500">
+              <tr className="border-b border-white/10 text-left text-neutral-500">
                 <th className="px-4 py-3 font-medium">Customer</th>
                 <th className="px-4 py-3 font-medium">Progress</th>
                 <th className="px-4 py-3 font-medium">Total stamps ever</th>
@@ -68,9 +68,9 @@ function Dashboard() {
             </thead>
             <tbody>
               {customers.map((entry) => (
-                <tr key={entry.id} className="border-b border-neutral-800/60 last:border-0">
-                  <td className="px-4 py-3 text-white">{entry.customer.email}</td>
-                  <td className="px-4 py-3 text-amber-400">{entry.currentStamps}/{business.stampsRequired}</td>
+                <tr key={entry.id} className="border-b border-white/6 last:border-0">
+                  <td className="px-4 py-3 text-neutral-50">{entry.customer.email}</td>
+                  <td className="px-4 py-3 text-accent-soft">{entry.currentStamps}/{business.stampsRequired}</td>
                   <td className="px-4 py-3 text-neutral-400">{entry.totalStampsEver}</td>
                 </tr>
               ))}

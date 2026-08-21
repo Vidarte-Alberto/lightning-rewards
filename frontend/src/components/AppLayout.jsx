@@ -18,11 +18,11 @@ function AppLayout() {
   const links = user?.role === 'BUSINESS' ? BUSINESS_LINKS : CUSTOMER_LINKS;
 
   return (
-    <div className="min-h-screen bg-neutral-950 bg-[radial-gradient(circle_at_88%_0%,rgba(245,165,36,0.08),transparent_28rem)]">
-      <header className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur">
+    <div className="min-h-screen bg-ink bg-[radial-gradient(circle_at_88%_0%,rgba(245,165,36,0.08),transparent_28rem)]">
+      <header className="border-b border-white/10 bg-ink/80 backdrop-blur">
         <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-4">
-            <span className="flex items-center gap-2 font-semibold text-white">
+            <span className="flex items-center gap-2 font-semibold text-neutral-50">
               <span aria-hidden="true">🥇</span> Lightning Rewards
             </span>
             <div className="flex min-w-0 items-center gap-3 text-sm text-neutral-400">
@@ -32,7 +32,7 @@ function AppLayout() {
               <button
                 type="button"
                 onClick={logout}
-                className="whitespace-nowrap rounded-lg border border-neutral-700 px-3 py-2 text-sm font-medium text-white transition-colors hover:border-amber-500 hover:text-amber-400 sm:px-4"
+                className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full border border-white/16 bg-white/4 px-4 text-sm font-extrabold text-neutral-100 transition-transform hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent-soft sm:px-5"
               >
                 Log out
               </button>
@@ -44,7 +44,7 @@ function AppLayout() {
                 key={link.to}
                 to={link.to}
                 className={({ isActive }) =>
-                  `whitespace-nowrap ${isActive ? 'font-medium text-amber-400' : 'hover:text-white'}`
+                  `whitespace-nowrap ${isActive ? 'font-medium text-accent-soft' : 'hover:text-neutral-50'}`
                 }
               >
                 {link.label}
