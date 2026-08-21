@@ -7,7 +7,9 @@ import { asyncHandler, requireAuth, requireRole } from '../middlewares';
 import {
   ClinkService,
   getBusinessCustomers,
+  getBusinessDetail,
   getCustomerCards,
+  listBusinesses,
   PaymentService,
 } from '../services';
 import { login, register, updateCustomerProfile } from '../auth';
@@ -51,6 +53,22 @@ router.use(
   requireAuth,
   requireRole(Role.CUSTOMER),
   createPaymentRouter(paymentService),
+);
+
+router.get(
+  '/businesses',
+  asyncHandler(async (req, res) => {
+    const businesses = await listBusinesses(req.query);
+    res.json({ businesses });
+  }),
+);
+
+router.get(
+  '/businesses/:id',
+  asyncHandler(async (req, res) => {
+    const business = await getBusinessDetail(req.params.id, req.query);
+    res.json({ business });
+  }),
 );
 
 router.get(
