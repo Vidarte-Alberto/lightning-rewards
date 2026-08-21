@@ -4,6 +4,7 @@ import {
   EmbeddedWalletSlide,
   LoyaltySimulationSlide,
   MultiWalletArchitectureSlide,
+  RewardRedemptionSlide,
   WalletOnboardingSlide,
 } from './walletSlides';
 
@@ -143,7 +144,7 @@ function CustomerSlide() {
     <div>
       <SlideHeading
         eyebrow="Customer experience"
-        title="From discovery to reward in four clear moments."
+        title="From discovery to reward in four clear steps."
       />
       <div className="presentation-customer-layout">
         <ol className="presentation-journey">
@@ -461,6 +462,7 @@ export const PRESENTATION_SLIDES = [
   { id: 'wallet-onboarding', title: 'Wallet onboarding', component: WalletOnboardingSlide, notes: 'Run Create my wallet. Explain that one unique Nostr key calls Nenroll and receives noffer, ndebit, and nmanage without manual configuration.' },
   { id: 'embedded-wallet', title: 'Embedded wallet', component: EmbeddedWalletSlide, notes: 'Explore Overview, Receive, Send, and Activity. This is deterministic prototype data representing the Lightning.Pub RPC experience.' },
   { id: 'loyalty-simulation', title: 'Wallet purchase', component: LoyaltySimulationSlide, notes: 'Run the purchase and narrate invoice creation, hosted payment, settlement, and the atomic fifth stamp.' },
+  { id: 'reward-redemption', title: 'Reward redemption', component: RewardRedemptionSlide, notes: 'Show how an available reward remains visible, is confirmed with staff, and is persisted as redeemed exactly once.' },
   { id: 'business', title: 'Business journey', component: BusinessSlide, notes: 'The business defines the offer and reward, then observes customers and transactions.' },
   { id: 'multi-wallet', title: 'One Pub, many wallets', component: MultiWalletArchitectureSlide, notes: 'Select accounts. Balances and identities are isolated, while LND channels and liquidity are shared.' },
   { id: 'architecture', title: 'Architecture', component: ArchitectureSlide, notes: 'Separate the conventional web stack from the CLINK payment edge. Emphasize that Postgres stores business truth.' },

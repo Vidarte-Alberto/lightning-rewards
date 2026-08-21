@@ -17,12 +17,12 @@ test('renders the first slide and starts the presentation', () => {
   expect(
     screen.getByRole('heading', { level: 1, name: /every payment becomes/i }),
   ).toBeInTheDocument();
-  expect(screen.getByText('01 / 14')).toBeInTheDocument();
+  expect(screen.getByText('01 / 15')).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('button', { name: /start presentation/i }));
 
   expect(screen.getByRole('heading', { name: /loyalty programs add friction/i })).toBeInTheDocument();
-  expect(screen.getByText('02 / 14')).toBeInTheDocument();
+  expect(screen.getByText('02 / 15')).toBeInTheDocument();
 });
 
 test('supports keyboard navigation across the deck', () => {
@@ -38,7 +38,7 @@ test('supports keyboard navigation across the deck', () => {
   expect(screen.getByRole('heading', { name: /loyalty that happens/i })).toBeInTheDocument();
 
   fireEvent.keyDown(window, { key: 'Home' });
-  expect(screen.getByText('01 / 14')).toBeInTheDocument();
+  expect(screen.getByText('01 / 15')).toBeInTheDocument();
 });
 
 test('opens presenter notes for the active slide', () => {
@@ -54,7 +54,7 @@ test('opens presenter notes for the active slide', () => {
 test('selects slides directly and exposes hybrid demo links', () => {
   renderPresentation();
 
-  fireEvent.click(screen.getByRole('button', { name: /go to slide 13/i }));
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 14/i }));
 
   expect(screen.getByRole('heading', { name: /reliable product story/i })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /business login/i })).toHaveAttribute('href', '/login');
@@ -64,7 +64,7 @@ test('selects slides directly and exposes hybrid demo links', () => {
 test('explains each architecture layer interactively', () => {
   renderPresentation();
 
-  fireEvent.click(screen.getByRole('button', { name: /go to slide 10/i }));
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 11/i }));
   fireEvent.click(screen.getByRole('button', { name: /prisma \+ postgresql/i }));
 
   expect(screen.getByText(/postgresql stores app state and encrypted wallet references/i)).toBeInTheDocument();
@@ -74,7 +74,7 @@ test('explains each architecture layer interactively', () => {
 test('lets the presenter inspect every CLINK message', () => {
   renderPresentation();
 
-  fireEvent.click(screen.getByRole('button', { name: /go to slide 11/i }));
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 12/i }));
   fireEvent.click(screen.getByRole('button', { name: /pay invoice/i }));
 
   expect(screen.getByText(/lightning settlement · internal or routed/i)).toBeInTheDocument();
@@ -92,6 +92,23 @@ test('creates a wallet inside the onboarding prototype', () => {
   expect(screen.getByText(/identity created/i)).toBeInTheDocument();
 });
 
+test('explains how an existing CLINK wallet connects', () => {
+  renderPresentation();
+
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 5/i }));
+  fireEvent.click(screen.getByRole('button', { name: /connect existing/i }));
+
+  expect(screen.getByText(/existing wallet connection/i)).toBeInTheDocument();
+  expect(screen.getByText(/keys, balance, and payment history remain/i)).toBeInTheDocument();
+  expect(screen.getByText(/grants lightning rewards permission/i)).toBeInTheDocument();
+  expect(screen.getByText(/customer approves a budget/i)).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: /connect wallet/i }));
+
+  expect(screen.getByRole('button', { name: /connecting wallet/i })).toBeDisabled();
+  expect(screen.getByText('Scoped nDebit', { selector: 'code' })).toBeInTheDocument();
+});
+
 test('supports receiving and sending in the embedded wallet prototype', () => {
   renderPresentation();
 
@@ -105,4 +122,18 @@ test('supports receiving and sending in the embedded wallet prototype', () => {
 
   expect(screen.getByRole('heading', { name: /payment sent/i })).toBeInTheDocument();
   expect(screen.getByText(/new balance: 5,000 sats/i)).toBeInTheDocument();
+});
+
+test('shows the complete reward redemption flow', () => {
+  renderPresentation();
+
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 8/i }));
+  expect(screen.getByRole('heading', { name: /unlocked rewards stay ready/i })).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: /redeem reward/i }));
+  expect(screen.getByText(/show this screen to staff/i)).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: /redeem now/i }));
+  expect(screen.getByText('Reward redeemed', { selector: 'strong' })).toBeInTheDocument();
+  expect(screen.getByText(/available → redeemed/i)).toBeInTheDocument();
 });

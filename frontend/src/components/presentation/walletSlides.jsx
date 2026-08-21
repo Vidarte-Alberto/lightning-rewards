@@ -16,15 +16,23 @@ const PROVISIONING_STEPS = [
   ['Wallet ready', 'noffer, ndebit, and nmanage now belong to this user.'],
 ];
 
+const EXISTING_WALLET_STEPS = [
+  ['Wallet stays yours', 'Keys, balance, and payment history remain in the wallet the customer already trusts.'],
+  ['Share a scoped nDebit', 'The wallet grants Lightning Rewards permission to request payments through CLINK.'],
+  ['Authorize and earn', 'The customer approves a budget, the wallet pays, and Rewards records each loyalty stamp.'],
+];
+
 export function WalletOnboardingSlide() {
   const [mode, setMode] = useState('embedded');
   const [progress, setProgress] = useState(-1);
+  const steps = mode === 'embedded' ? PROVISIONING_STEPS : EXISTING_WALLET_STEPS;
+  const isComplete = progress === steps.length - 1;
 
   useEffect(() => {
-    if (progress < 0 || progress >= PROVISIONING_STEPS.length - 1) return undefined;
+    if (progress < 0 || progress >= steps.length - 1) return undefined;
     const timer = window.setTimeout(() => setProgress((value) => value + 1), 650);
     return () => window.clearTimeout(timer);
-  }, [progress]);
+  }, [progress, steps.length]);
 
   const resetMode = (nextMode) => {
     setMode(nextMode);
@@ -35,8 +43,8 @@ export function WalletOnboardingSlide() {
     <div>
       <SlideHeading
         eyebrow="Wallet onboarding · Interactive prototype"
-        title="Join with one click—or bring the wallet you already trust."
-        description="Choose a path, then create the embedded account to see how CLINK removes manual noffer and ndebit setup."
+        title="Join with one tap—or bring the wallet you already trust."
+        description="Choose a path to see how CLINK provisions a new account or connects an existing wallet without moving custody."
       />
       <div className="presentation-onboarding-grid">
         <section className="presentation-onboarding-choice">
@@ -59,26 +67,39 @@ export function WalletOnboardingSlide() {
               <div><small>Portable by design</small><h3>Connect any CLINK-compatible wallet.</h3></div>
               <label>Customer debit<input readOnly value="ndebit1qq…4x8p" aria-label="Mock customer debit" /></label>
               <p>External wallets keep balance and history in their own app while still earning loyalty stamps here.</p>
-              <button type="button" onClick={() => setProgress(2)}>Connect wallet</button>
+              <button type="button" onClick={() => setProgress(0)} disabled={progress >= 0 && !isComplete}>
+                {isComplete ? 'Wallet connected ✓' : progress >= 0 ? 'Connecting wallet…' : 'Connect wallet'}
+              </button>
             </div>
           )}
         </section>
 
         <section className="presentation-provisioning-panel" aria-live="polite">
-          <header><span>Account provisioning</span><strong>{progress === 2 ? 'Active' : progress >= 0 ? 'In progress' : 'Waiting'}</strong></header>
+          <header>
+            <span>{mode === 'embedded' ? 'Account provisioning' : 'Existing wallet connection'}</span>
+            <strong>{isComplete ? (mode === 'embedded' ? 'Active' : 'Connected') : progress >= 0 ? 'In progress' : 'Waiting'}</strong>
+          </header>
           <ol>
-            {PROVISIONING_STEPS.map(([title, copy], index) => (
+            {steps.map(([title, copy], index) => (
               <li key={title} className={progress >= index ? 'is-complete' : ''}>
                 <span>{progress >= index ? '✓' : index + 1}</span>
                 <div><strong>{title}</strong><p>{copy}</p></div>
               </li>
             ))}
           </ol>
-          <div className="presentation-pointer-row">
-            <div><small>Receive</small><code>{progress === 2 ? 'noffer1q3…9dk' : '—'}</code></div>
-            <div><small>Pay</small><code>{progress === 2 ? 'ndebit1qc…2mv' : '—'}</code></div>
-            <div><small>Manage</small><code>{progress === 2 ? 'nmanage1…7fz' : '—'}</code></div>
-          </div>
+          {mode === 'embedded' ? (
+            <div className="presentation-pointer-row">
+              <div><small>Receive</small><code>{isComplete ? 'noffer1q3…9dk' : '—'}</code></div>
+              <div><small>Pay</small><code>{isComplete ? 'ndebit1qc…2mv' : '—'}</code></div>
+              <div><small>Manage</small><code>{isComplete ? 'nmanage1…7fz' : '—'}</code></div>
+            </div>
+          ) : (
+            <div className="presentation-pointer-row">
+              <div><small>Custody</small><code>{isComplete ? 'External wallet' : 'Unchanged'}</code></div>
+              <div><small>Permission</small><code>{isComplete ? 'nDebit approved' : 'Scoped nDebit'}</code></div>
+              <div><small>Loyalty</small><code>{isComplete ? 'Ready to earn' : 'Connect to enable'}</code></div>
+            </div>
+          )}
         </section>
       </div>
     </div>
@@ -195,8 +216,8 @@ export function EmbeddedWalletSlide() {
     <div>
       <SlideHeading
         eyebrow="Embedded wallet · Interactive prototype"
-        title="The wallet lives where loyalty already happens."
-        description="Try every tab. This deterministic mock demonstrates the target experience without moving real sats during the pitch."
+        title="The wallet lives where loyalty happens."
+        description="Try every tab. This mock demonstrates the target experience without moving real sats."
       />
       <div className="presentation-wallet-app">
         <aside>
@@ -257,8 +278,7 @@ export function LoyaltySimulationSlide() {
     <div>
       <SlideHeading
         eyebrow="End-to-end purchase · Interactive prototype"
-        title="Run the moment a Lightning payment becomes loyalty."
-        description="One click animates the same state transitions enforced by the real backend."
+        title="A Lightning payment becomes loyalty."
       />
       <div className="presentation-purchase-simulator">
         <section className="presentation-checkout-mock">
@@ -278,6 +298,79 @@ export function LoyaltySimulationSlide() {
       <ol className="presentation-sim-timeline">
         {PURCHASE_STAGES.slice(1).map((item, index) => <li key={item.label} className={stage > index ? 'is-active' : ''}><span>{stage > index ? '✓' : index + 1}</span>{item.label}</li>)}
       </ol>
+    </div>
+  );
+}
+
+export function RewardRedemptionSlide() {
+  const [stage, setStage] = useState('available');
+  const isConfirming = stage === 'confirming';
+  const isRedeemed = stage === 'redeemed';
+
+  return (
+    <div>
+      <SlideHeading
+        eyebrow="Reward redemption · Interactive prototype"
+        title="Unlocked rewards stay ready until they are redeemed."
+        description="The customer confirms redemption with the business, and the reward moves permanently into their history."
+      />
+      <div className="presentation-redemption-grid">
+        <section className={`presentation-redemption-card ${isRedeemed ? 'is-redeemed' : ''}`}>
+          <header>
+            <div className="presentation-merchant-mark">LC</div>
+            <div><small>Lightning Coffee</small><strong>Free house drink</strong></div>
+            <span>{isRedeemed ? 'Redeemed' : 'Reward ready'}</span>
+          </header>
+          <div className="presentation-mini-stamps" aria-label="Five of five stamps">
+            {[0, 1, 2, 3, 4].map((index) => <span key={index} className="is-filled">⚡</span>)}
+          </div>
+          <p>Earned after purchase #5 · Today</p>
+
+          {stage === 'available' && (
+            <button type="button" onClick={() => setStage('confirming')}>Redeem reward</button>
+          )}
+          {isConfirming && (
+            <div className="presentation-redemption-confirm">
+              <strong>Confirm with the business</strong>
+              <p>Show this screen to staff. Redeem only when they are ready to honor the reward.</p>
+              <div>
+                <button type="button" onClick={() => setStage('redeemed')}>Redeem now</button>
+                <button type="button" onClick={() => setStage('available')}>Cancel</button>
+              </div>
+            </div>
+          )}
+          {isRedeemed && (
+            <div className="presentation-redemption-success">
+              <span>✓</span>
+              <div><strong>Reward redeemed</strong><p>Saved to redemption history · Just now</p></div>
+              <button type="button" onClick={() => setStage('available')}>Replay flow</button>
+            </div>
+          )}
+        </section>
+
+        <section className="presentation-redemption-flow" aria-live="polite">
+          <header><span>Redemption lifecycle</span><strong>{isRedeemed ? 'Complete' : isConfirming ? 'Confirming' : 'Available'}</strong></header>
+          <ol>
+            {[
+              ['Available', 'The earned reward remains visible in My cards until the customer chooses to use it.'],
+              ['Confirm', 'The customer shows the reward to staff and confirms redemption at the counter.'],
+              ['Redeemed', 'The API verifies ownership and stores REDEEMED with a redemption timestamp.'],
+            ].map(([title, copy], index) => {
+              const activeIndex = stage === 'available' ? 0 : isConfirming ? 1 : 2;
+              return (
+                <li key={title} className={activeIndex >= index ? 'is-active' : ''}>
+                  <span>{activeIndex > index || isRedeemed ? '✓' : index + 1}</span>
+                  <div><strong>{title}</strong><p>{copy}</p></div>
+                </li>
+              );
+            })}
+          </ol>
+          <div className="presentation-redemption-state">
+            <small>Database state</small>
+            <code>{isRedeemed ? 'AVAILABLE → REDEEMED · redeemedAt saved' : 'AVAILABLE · ready to redeem'}</code>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
