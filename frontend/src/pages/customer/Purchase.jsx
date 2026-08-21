@@ -80,19 +80,19 @@ function Purchase() {
   }
 
   if (status === 'load-error') {
-    return <p className="text-red-600" role="alert">{loadError}</p>;
+    return <p className="text-red-400" role="alert">{loadError}</p>;
   }
 
   if (!user.ndebitString) {
     return (
       <div className="max-w-md">
-        <h1 className="text-2xl font-bold text-neutral-900">Connect your wallet first</h1>
-        <p className="mt-2 text-neutral-600">
+        <h1 className="text-2xl font-bold text-white">Connect your wallet first</h1>
+        <p className="mt-2 text-neutral-400">
           You need to connect a Lightning wallet before you can pay {business.name}.
         </p>
         <Link
           to="/customer/wallet"
-          className="mt-6 inline-block rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700"
+          className="mt-6 inline-block rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400"
         >
           Connect wallet
         </Link>
@@ -103,9 +103,9 @@ function Purchase() {
   if (status === 'pending') {
     return (
       <div className="max-w-md py-16 text-center" role="status">
-        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-900" />
-        <h1 className="mt-6 text-xl font-semibold text-neutral-900">Waiting for wallet approval…</h1>
-        <p className="mt-2 text-neutral-600">
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-neutral-800 border-t-amber-500" />
+        <h1 className="mt-6 text-xl font-semibold text-white">Waiting for wallet approval…</h1>
+        <p className="mt-2 text-neutral-400">
           Open ShockWallet and approve the Lightning Rewards payment request to continue.
         </p>
       </div>
@@ -115,23 +115,23 @@ function Purchase() {
   if (status === 'success') {
     return (
       <div className="max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-neutral-900">Payment confirmed</h1>
-        <p className="mt-2 text-neutral-600">You earned a stamp at {business.name}.</p>
+        <h1 className="text-2xl font-bold text-white">Payment confirmed</h1>
+        <p className="mt-2 text-neutral-400">You earned a stamp at {business.name}.</p>
         {result.loyalty?.rewardUnlocked && (
-          <p className="mt-4 text-lg font-semibold text-neutral-900">
+          <p className="mt-4 text-lg font-semibold text-amber-400">
             🎉 Reward unlocked: {result.loyalty.reward.description}
           </p>
         )}
         {result.loyalty && !result.loyalty.rewardUnlocked && (
-          <p className="mt-3 text-sm text-neutral-600">
+          <p className="mt-3 text-sm text-neutral-400">
             {result.loyalty.card.currentStamps}/{result.loyalty.stampsRequired} stamps collected
           </p>
         )}
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
-          <Link to="/customer/cards" className="rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700">
+          <Link to="/customer/cards" className="rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400">
             View my cards
           </Link>
-          <Link to="/customer/discover" className="rounded-lg border border-neutral-300 px-6 py-3 font-medium text-neutral-900 transition-colors hover:border-neutral-900">
+          <Link to="/customer/discover" className="rounded-lg border border-neutral-700 px-6 py-3 font-medium text-white transition-colors hover:border-amber-500 hover:text-amber-400">
             Discover more
           </Link>
         </div>
@@ -142,11 +142,11 @@ function Purchase() {
   if (status === 'unconfirmed') {
     return (
       <div className="max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-neutral-900">Payment not confirmed</h1>
-        <p className="mt-2 text-neutral-600">
+        <h1 className="text-2xl font-bold text-white">Payment not confirmed</h1>
+        <p className="mt-2 text-neutral-400">
           We could not confirm the final payment status. Check your wallet before trying again.
         </p>
-        <Link to="/customer/discover" className="mt-6 inline-block rounded-lg border border-neutral-300 px-6 py-3 font-medium text-neutral-900 hover:border-neutral-900">
+        <Link to="/customer/discover" className="mt-6 inline-block rounded-lg border border-neutral-700 px-6 py-3 font-medium text-white hover:border-amber-500 hover:text-amber-400">
           Back to Discover
         </Link>
       </div>
@@ -158,10 +158,10 @@ function Purchase() {
 
     return (
       <div className="max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-neutral-900">
+        <h1 className="text-2xl font-bold text-white">
           {approvalDenied ? 'Payment approval declined' : 'Payment failed'}
         </h1>
-        <p className="mt-2 text-neutral-600" role="alert">
+        <p className="mt-2 text-neutral-400" role="alert">
           {approvalDenied
             ? 'The payment was not approved. Open ShockWallet and approve the next request when you try again.'
             : paymentError?.message}
@@ -170,7 +170,7 @@ function Purchase() {
         <button
           type="button"
           onClick={retry}
-          className="mt-6 rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700"
+          className="mt-6 rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400"
         >
           {approvalDenied ? 'Try payment again' : 'Try again'}
         </button>
@@ -180,8 +180,8 @@ function Purchase() {
 
   return (
     <div className="max-w-md">
-      <h1 className="text-2xl font-bold text-neutral-900">Buy from {business.name}</h1>
-      <p className="mt-2 text-neutral-600">
+      <h1 className="text-2xl font-bold text-white">Buy from {business.name}</h1>
+      <p className="mt-2 text-neutral-400">
         {business.rewardDescription} every {business.stampsRequired} stamps.
       </p>
 
@@ -198,7 +198,7 @@ function Purchase() {
         />
         <button
           type="submit"
-          className="w-full rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700"
+          className="w-full rounded-lg bg-amber-500 px-6 py-3 font-semibold text-neutral-950 transition-colors hover:bg-amber-400"
         >
           Pay with Lightning
         </button>
