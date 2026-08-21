@@ -32,27 +32,27 @@ function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-neutral-950 bg-[radial-gradient(circle_at_50%_0%,rgba(245,165,36,0.08),transparent_28rem)]">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-semibold text-neutral-900 text-center">Log in</h1>
+        <h1 className="text-2xl font-semibold text-white text-center">Log in</h1>
 
         <FormField id="email" label="Email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
         <FormField id="password" label="Password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} />
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-red-400">{error}</p>}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-700 transition-colors disabled:opacity-50"
+          className="w-full px-6 py-3 rounded-lg bg-amber-500 text-neutral-950 font-semibold hover:bg-amber-400 transition-colors disabled:opacity-50"
         >
           {isSubmitting ? 'Logging in…' : 'Log in'}
         </button>
 
-        <p className="text-sm text-neutral-600 text-center">
-          No account? <Link to="/register" className="underline underline-offset-4">Sign up</Link>
+        <p className="text-sm text-neutral-400 text-center">
+          No account? <Link to="/register" className="text-amber-400 underline underline-offset-4 hover:text-amber-300">Sign up</Link>
         </p>
-        <Link to="/" className="block text-sm text-neutral-500 text-center underline underline-offset-4">
+        <Link to="/" className="block text-sm text-neutral-500 text-center underline underline-offset-4 hover:text-neutral-300">
           Back to home
         </Link>
       </form>

@@ -10,15 +10,15 @@ import FormField from '../../components/FormField';
 const OFFER_STATUS = {
   checking: {
     label: 'Checking offer…',
-    className: 'border-neutral-300 bg-neutral-50 text-neutral-600',
+    className: 'border-neutral-700 bg-neutral-900 text-neutral-400',
   },
   available: {
     label: 'Offer available',
-    className: 'border-green-200 bg-green-50 text-green-700',
+    className: 'border-green-500/30 bg-green-500/10 text-green-400',
   },
   unavailable: {
     label: 'Offer unavailable',
-    className: 'border-red-200 bg-red-50 text-red-700',
+    className: 'border-red-500/30 bg-red-500/10 text-red-400',
   },
 };
 
@@ -122,7 +122,7 @@ function Settings() {
 
   return (
     <div className="max-w-md">
-      <h1 className="text-2xl font-bold text-neutral-900">Settings</h1>
+      <h1 className="text-2xl font-bold text-white">Settings</h1>
 
       {isLoading ? (
         <p className="mt-6 text-neutral-500">Loading settings…</p>
@@ -163,7 +163,7 @@ function Settings() {
         <OfferStatus status={offerStatus} message={offerMessage} />
 
         {nofferString.trim() !== savedNofferString && (
-          <p className="text-sm text-amber-700">
+          <p className="text-sm text-amber-400">
             Save your changes before checking the updated offer.
           </p>
         )}
@@ -176,19 +176,19 @@ function Settings() {
             isSubmitting ||
             nofferString.trim() !== savedNofferString
           }
-          className="px-4 py-2 rounded-lg border border-neutral-300 text-sm font-medium text-neutral-900 hover:border-neutral-900 transition-colors disabled:opacity-50"
+          className="px-4 py-2 rounded-lg border border-neutral-700 text-sm font-medium text-white hover:border-amber-500 hover:text-amber-400 transition-colors disabled:opacity-50"
         >
           {offerStatus === 'checking' ? 'Checking…' : 'Check offer'}
         </button>
 
         {status && (
-          <p className={`text-sm ${status.type === 'error' ? 'text-red-600' : 'text-green-700'}`}>{status.message}</p>
+          <p className={`text-sm ${status.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>{status.message}</p>
         )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-700 transition-colors disabled:opacity-50"
+          className="px-6 py-3 rounded-lg bg-amber-500 text-neutral-950 font-semibold hover:bg-amber-400 transition-colors disabled:opacity-50"
         >
           {isSubmitting ? 'Saving…' : 'Save changes'}
         </button>

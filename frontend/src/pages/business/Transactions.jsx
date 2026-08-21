@@ -3,10 +3,10 @@ import { useAuth } from '../../context/AuthContext';
 import { getOwnedBusinessTransactionsRequest } from '../../lib/api';
 
 const STATUS_STYLES = {
-  PAID: 'text-green-700',
-  FAILED: 'text-red-600',
+  PAID: 'text-green-400',
+  FAILED: 'text-red-400',
   PENDING: 'text-neutral-500',
-  UNKNOWN: 'text-amber-700',
+  UNKNOWN: 'text-amber-400',
 };
 
 function Transactions() {
@@ -36,19 +36,19 @@ function Transactions() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-neutral-900">Transactions</h1>
+      <h1 className="text-2xl font-bold text-white">Transactions</h1>
 
       {isLoading ? (
         <p className="mt-8 text-neutral-500">Loading transactions…</p>
       ) : error ? (
-        <p className="mt-8 text-red-600">{error}</p>
+        <p className="mt-8 text-red-400">{error}</p>
       ) : transactions.length === 0 ? (
         <p className="mt-8 text-neutral-500">No transactions yet.</p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+        <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900/60">
           <table className="min-w-[42rem] w-full text-sm">
             <thead>
-              <tr className="border-b border-neutral-200 text-left text-neutral-500">
+              <tr className="border-b border-neutral-800 text-left text-neutral-500">
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Customer</th>
                 <th className="px-4 py-3 font-medium">Amount</th>
@@ -57,10 +57,10 @@ function Transactions() {
             </thead>
             <tbody>
               {transactions.map((transaction) => (
-                <tr key={transaction.id} className="border-b border-neutral-100 last:border-0">
-                  <td className="px-4 py-3 text-neutral-600">{new Date(transaction.createdAt).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-neutral-600">{transaction.customer.email}</td>
-                  <td className="px-4 py-3 text-neutral-900">{transaction.amountSats} sats</td>
+                <tr key={transaction.id} className="border-b border-neutral-800/60 last:border-0">
+                  <td className="px-4 py-3 text-neutral-400">{new Date(transaction.createdAt).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-neutral-400">{transaction.customer.email}</td>
+                  <td className="px-4 py-3 text-white">{transaction.amountSats} sats</td>
                   <td className={`px-4 py-3 font-medium ${STATUS_STYLES[transaction.status]}`}>{transaction.status}</td>
                 </tr>
               ))}
