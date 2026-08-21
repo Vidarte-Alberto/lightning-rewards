@@ -1,9 +1,16 @@
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import App from '../src/App';
 
-test('App component render', async () => {
-  render(<App />);
+test('renders the landing page at /', () => {
+  render(
+    <MemoryRouter initialEntries={['/']}>
+      <App />
+    </MemoryRouter>,
+  );
 
-  expect(screen.getByRole('button')).toHaveTextContent('count');
+  expect(
+    screen.getByRole('heading', { level: 1, name: /loyalty stamps/i }),
+  ).toBeInTheDocument();
 });
