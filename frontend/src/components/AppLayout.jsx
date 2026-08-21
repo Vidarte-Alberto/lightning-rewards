@@ -20,32 +20,38 @@ function AppLayout() {
   return (
     <div className="min-h-screen bg-neutral-50">
       <header className="border-b border-neutral-200 bg-white">
-        <nav className="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
-          <span className="font-semibold text-neutral-900">Lightning Rewards</span>
-          <div className="flex items-center gap-3 sm:gap-6 text-sm text-neutral-600">
+        <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center justify-between gap-4">
+            <span className="font-semibold text-neutral-900">Lightning Rewards</span>
+            <div className="flex min-w-0 items-center gap-3 text-sm text-neutral-600">
+              <span className="hidden max-w-56 truncate text-neutral-400 lg:inline" title={user?.email}>
+                {user?.email}
+              </span>
+              <button
+                type="button"
+                onClick={logout}
+                className="whitespace-nowrap rounded-lg border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-900 sm:px-4"
+              >
+                Log out
+              </button>
+            </div>
+          </div>
+          <nav aria-label="Primary" className="mt-3 flex gap-5 overflow-x-auto pb-1 text-sm text-neutral-600 sm:mt-4 sm:gap-6">
             {links.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
-                className={({ isActive }) => (isActive ? 'text-neutral-900 font-medium' : 'hover:text-neutral-900')}
+                className={({ isActive }) =>
+                  `whitespace-nowrap ${isActive ? 'font-medium text-neutral-900' : 'hover:text-neutral-900'}`
+                }
               >
                 {link.label}
               </NavLink>
             ))}
-            <span className="hidden lg:inline text-neutral-400" title={user?.email}>
-              {user?.email}
-            </span>
-            <button
-              type="button"
-              onClick={logout}
-              className="text-sm font-medium px-4 py-2 rounded-lg border border-neutral-300 text-neutral-900 hover:border-neutral-900 transition-colors"
-            >
-              Log out
-            </button>
-          </div>
-        </nav>
+          </nav>
+        </div>
       </header>
-      <main className="max-w-5xl mx-auto px-6 py-10">
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
         <Outlet />
       </main>
     </div>
