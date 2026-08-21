@@ -56,6 +56,9 @@ export type ClinkSdkModule = {
     k1?: string,
     description?: string,
   ): NdebitData;
+  nip19?: {
+    npubEncode(publicKeyHex: string): string;
+  };
 } & Partial<ClinkCryptoModule>;
 
 type ClinkModuleLoader = () => Promise<ClinkSdkModule>;
@@ -126,6 +129,27 @@ export class ClinkService {
     this.privateKey = privateKeyFromHex(options.privateKeyHex);
     this.timeoutSeconds = options.timeoutSeconds;
     this.loadModule = options.loadModule ?? defaultModuleLoader;
+  }
+
+  async getPlatformIdentity() {
+    const sdkModule = await this.loadModule();
+
+    if (
+      typeof sdkModule.getPublicKey !== 'function' ||
+      typeof sdkModule.nip19?.npubEncode !== 'function'
+    ) {
+      throw new ClinkServiceError({
+        operation: 'debit',
+        code: 'CLINK_CONFIGURATION',
+        publicMessage: 'The payment service identity is not available.',
+      });
+    }
+
+    const publicKeyHex = sdkModule.getPublicKey(this.privateKey);
+    return {
+      publicKeyHex,
+      npub: sdkModule.nip19.npubEncode(publicKeyHex),
+    };
   }
 
   async requestInvoiceFromOffer(

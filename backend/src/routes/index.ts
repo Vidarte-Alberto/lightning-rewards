@@ -11,6 +11,7 @@ import {
   getBusinessCustomers,
   getBusinessDetail,
   getCustomerCards,
+  getCustomerClinkSetup,
   getOwnedBusiness,
   getOwnedBusinessCustomers,
   getOwnedBusinessTransactions,
@@ -74,6 +75,16 @@ router.get(
   asyncHandler(async (req, res) => {
     const cards = await getCustomerCards(req.user.id);
     res.json({ cards });
+  }),
+);
+
+router.get(
+  '/customers/me/clink-setup',
+  requireAuth,
+  requireRole(Role.CUSTOMER),
+  asyncHandler(async (_req, res) => {
+    const clinkSetup = await getCustomerClinkSetup(clinkService);
+    res.json({ clinkSetup });
   }),
 );
 

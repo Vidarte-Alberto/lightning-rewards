@@ -19,7 +19,8 @@ function Purchase() {
   const [amountSats, setAmountSats] = useState('1000');
   const [status, setStatus] = useState('loading');
   const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [loadError, setLoadError] = useState(null);
+  const [paymentError, setPaymentError] = useState(null);
   const [idempotencyKey, setIdempotencyKey] = useState(newIdempotencyKey);
   const [startsNewAttempt, setStartsNewAttempt] = useState(false);
 
@@ -34,7 +35,7 @@ function Purchase() {
       })
       .catch((requestError) => {
         if (!active) return;
-        setError(requestError.message);
+        setLoadError(requestError.message);
         setStatus('load-error');
       });
 
@@ -45,7 +46,7 @@ function Purchase() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError(null);
+    setPaymentError(null);
     setStartsNewAttempt(false);
     setStatus('pending');
 
@@ -61,7 +62,7 @@ function Purchase() {
       setResult(purchaseResult);
       setStatus(purchaseResult.outcome === 'paid' ? 'success' : 'unconfirmed');
     } catch (requestError) {
-      setError(requestError.message);
+      setPaymentError(requestError);
       setStartsNewAttempt(
         typeof requestError.status === 'number' && requestError.status !== 500,
       );
@@ -79,7 +80,7 @@ function Purchase() {
   }
 
   if (status === 'load-error') {
-    return <p className="text-red-600" role="alert">{error}</p>;
+    return <p className="text-red-600" role="alert">{loadError}</p>;
   }
 
   if (!user.ndebitString) {
@@ -104,7 +105,9 @@ function Purchase() {
       <div className="max-w-md py-16 text-center" role="status">
         <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-900" />
         <h1 className="mt-6 text-xl font-semibold text-neutral-900">Waiting for wallet approval…</h1>
-        <p className="mt-2 text-neutral-600">Approve the payment in your Lightning wallet to continue.</p>
+        <p className="mt-2 text-neutral-600">
+          Open ShockWallet and approve the Lightning Rewards payment request to continue.
+        </p>
       </div>
     );
   }
@@ -151,17 +154,25 @@ function Purchase() {
   }
 
   if (status === 'failure') {
+    const approvalDenied = paymentError?.code === 'CLINK_DEBIT_DENIED';
+
     return (
       <div className="max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-neutral-900">Payment failed</h1>
-        <p className="mt-2 text-neutral-600" role="alert">{error}</p>
+        <h1 className="text-2xl font-bold text-neutral-900">
+          {approvalDenied ? 'Payment approval declined' : 'Payment failed'}
+        </h1>
+        <p className="mt-2 text-neutral-600" role="alert">
+          {approvalDenied
+            ? 'The payment was not approved. Open ShockWallet and approve the next request when you try again.'
+            : paymentError?.message}
+        </p>
         <p className="mt-2 text-sm text-neutral-500">No stamp was added.</p>
         <button
           type="button"
           onClick={retry}
           className="mt-6 rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700"
         >
-          Try again
+          {approvalDenied ? 'Try payment again' : 'Try again'}
         </button>
       </div>
     );
