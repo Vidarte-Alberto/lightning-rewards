@@ -17,12 +17,12 @@ test('renders the first slide and starts the presentation', () => {
   expect(
     screen.getByRole('heading', { level: 1, name: /every payment becomes/i }),
   ).toBeInTheDocument();
-  expect(screen.getByText('01 / 10')).toBeInTheDocument();
+  expect(screen.getByText('01 / 14')).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('button', { name: /start presentation/i }));
 
   expect(screen.getByRole('heading', { name: /loyalty programs add friction/i })).toBeInTheDocument();
-  expect(screen.getByText('02 / 10')).toBeInTheDocument();
+  expect(screen.getByText('02 / 14')).toBeInTheDocument();
 });
 
 test('supports keyboard navigation across the deck', () => {
@@ -38,7 +38,7 @@ test('supports keyboard navigation across the deck', () => {
   expect(screen.getByRole('heading', { name: /loyalty that happens/i })).toBeInTheDocument();
 
   fireEvent.keyDown(window, { key: 'Home' });
-  expect(screen.getByText('01 / 10')).toBeInTheDocument();
+  expect(screen.getByText('01 / 14')).toBeInTheDocument();
 });
 
 test('opens presenter notes for the active slide', () => {
@@ -51,12 +51,12 @@ test('opens presenter notes for the active slide', () => {
   );
 });
 
-test('selects slides directly and exposes live demo links', () => {
+test('selects slides directly and exposes hybrid demo links', () => {
   renderPresentation();
 
-  fireEvent.click(screen.getByRole('button', { name: /go to slide 9/i }));
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 13/i }));
 
-  expect(screen.getByRole('heading', { name: /watch one payment travel/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /reliable product story/i })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /business login/i })).toHaveAttribute('href', '/login');
   expect(screen.getByRole('link', { name: /customer login/i })).toHaveAttribute('href', '/login');
 });
@@ -64,20 +64,45 @@ test('selects slides directly and exposes live demo links', () => {
 test('explains each architecture layer interactively', () => {
   renderPresentation();
 
-  fireEvent.click(screen.getByRole('button', { name: /go to slide 6/i }));
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 10/i }));
   fireEvent.click(screen.getByRole('button', { name: /prisma \+ postgresql/i }));
 
-  expect(screen.getByText(/postgresql stores the durable business truth/i)).toBeInTheDocument();
+  expect(screen.getByText(/postgresql stores app state and encrypted wallet references/i)).toBeInTheDocument();
   expect(screen.getByText(/produces: auditable loyalty progress/i)).toBeInTheDocument();
 });
 
 test('lets the presenter inspect every CLINK message', () => {
   renderPresentation();
 
-  fireEvent.click(screen.getByRole('button', { name: /go to slide 7/i }));
-  fireEvent.click(screen.getByRole('button', { name: /ndebit request/i }));
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 11/i }));
+  fireEvent.click(screen.getByRole('button', { name: /pay invoice/i }));
 
-  expect(screen.getByText(/encrypted nostr event · kind 21002/i)).toBeInTheDocument();
-  expect(screen.getByText(/the customer controls permission and budget/i)).toBeInTheDocument();
-  expect(screen.getByText(/message transport.*not the lightning payment/i)).toBeInTheDocument();
+  expect(screen.getByText(/lightning settlement · internal or routed/i)).toBeInTheDocument();
+  expect(screen.getByText(/10,000 sat application limit/i)).toBeInTheDocument();
+  expect(screen.getByText(/hosted balance, invoices, payments/i)).toBeInTheDocument();
+});
+
+test('creates a wallet inside the onboarding prototype', () => {
+  renderPresentation();
+
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 5/i }));
+  fireEvent.click(screen.getByRole('button', { name: /create my wallet/i }));
+
+  expect(screen.getByRole('button', { name: /creating wallet/i })).toBeDisabled();
+  expect(screen.getByText(/identity created/i)).toBeInTheDocument();
+});
+
+test('supports receiving and sending in the embedded wallet prototype', () => {
+  renderPresentation();
+
+  fireEvent.click(screen.getByRole('button', { name: /go to slide 6/i }));
+  fireEvent.click(screen.getByRole('button', { name: 'receive' }));
+  expect(screen.getByLabelText(/mock lightning invoice qr code/i)).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: 'send' }));
+  fireEvent.click(screen.getByRole('button', { name: /review payment/i }));
+  fireEvent.click(screen.getByRole('button', { name: /pay now/i }));
+
+  expect(screen.getByRole('heading', { name: /payment sent/i })).toBeInTheDocument();
+  expect(screen.getByText(/new balance: 5,000 sats/i)).toBeInTheDocument();
 });

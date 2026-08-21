@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  EmbeddedWalletSlide,
+  LoyaltySimulationSlide,
+  MultiWalletArchitectureSlide,
+  WalletOnboardingSlide,
+} from './walletSlides';
 
 function SlideHeading({ eyebrow, title, description }) {
   return (
@@ -17,8 +23,8 @@ function IntroSlide({ onNext }) {
       <p className="presentation-kicker">Lightning-native loyalty</p>
       <h1>Every payment becomes a reason to return.</h1>
       <p className="presentation-lede">
-        Lightning Rewards turns confirmed Bitcoin payments into automatic loyalty
-        stamps—without cards, QR punch systems, or manual steps at checkout.
+        Lightning Rewards combines an embedded Lightning wallet with automatic loyalty
+        stamps—so joining, paying, and earning all happen in one experience.
       </p>
       <div className="presentation-intro-actions">
         <button type="button" className="presentation-primary-action" onClick={onNext}>
@@ -66,23 +72,23 @@ function SolutionSlide() {
   const flow = [
     {
       label: 'Customer',
-      title: 'Pays with Lightning',
-      technology: 'ShockWallet · ndebit',
-      detail: 'The customer approves a specific invoice. The app receives payment permission—not the wallet seed or unrestricted access to funds.',
+      title: 'Joins with a wallet',
+      technology: 'Embedded or external',
+      detail: 'A new customer gets a hosted Lightning.Pub account automatically, while an experienced user can connect an existing CLINK wallet.',
       className: 'is-customer',
     },
     {
       label: 'Lightning Rewards',
       title: 'Orchestrates and verifies',
-      technology: 'CLINK · Nostr · API',
-      detail: 'The backend asks the merchant for an invoice, sends it to the customer wallet, and waits for an explicit payment result.',
+      technology: 'CLINK · Nostr · Loyalty',
+      detail: 'The app provisions accounts, coordinates payments, and turns a confirmed result into exactly one loyalty stamp.',
       className: 'is-engine',
     },
     {
       label: 'Business',
-      title: 'Gets paid + loyalty data',
-      technology: 'Lightning.Pub · noffer',
-      detail: 'The payment settles directly in the merchant wallet. The confirmed result becomes the source of truth for the loyalty stamp.',
+      title: 'Receives + retains',
+      technology: 'Wallet · noffer · insights',
+      detail: 'The merchant receives sats in an isolated account and sees loyalty progress without configuring a separate rewards system.',
       className: 'is-business',
     },
   ];
@@ -128,8 +134,8 @@ function SolutionSlide() {
 function CustomerSlide() {
   const steps = [
     ['Discover', 'Browse active local businesses and rewards.'],
-    ['Connect', 'Paste a ShockWallet ndebit once.'],
-    ['Pay', 'Approve manually or use a safe monthly budget.'],
+    ['Create', 'Get an embedded wallet—or connect an existing one.'],
+    ['Pay', 'Spend from the same interface with a clear confirmation.'],
     ['Earn', 'See the stamp—and reward—immediately.'],
   ];
 
@@ -169,19 +175,23 @@ function CustomerSlide() {
 }
 
 function BusinessSlide() {
+  const [view, setView] = useState('program');
+
   return (
     <div>
       <SlideHeading
         eyebrow="Business experience"
-        title="The merchant configures the program. Payments do the rest."
+        title="One dashboard for money, customers, and retention."
       />
       <div className="presentation-business-grid">
         <article className="presentation-program-card">
-          <span className="presentation-status-pill">Offer available</span>
-          <small>Loyalty program</small>
-          <h3>5 purchases</h3>
-          <p>Reward: A free house drink</p>
-          <div className="presentation-config-row"><span>CLINK offer</span><strong>noffer1…</strong></div>
+          <header><div><small>Lightning Coffee</small><h3>{view === 'wallet' ? '21,990 sats' : view === 'customers' ? '24 customers' : '5 purchases'}</h3></div><span className="presentation-status-pill">Wallet active</span></header>
+          <div className="presentation-segmented">
+            {['program', 'wallet', 'customers'].map((item) => <button type="button" key={item} className={view === item ? 'is-active' : ''} onClick={() => setView(item)}>{item}</button>)}
+          </div>
+          {view === 'program' && <><p>Reward: A free house drink</p><div className="presentation-config-row"><div><span>Rule</span><strong>5 stamps</strong></div><div><span>Offer</span><strong>noffer1…</strong></div><div><span>Status</span><strong>Live</strong></div></div></>}
+          {view === 'wallet' && <><p>Hosted account on the shared Lightning.Pub.</p><div className="presentation-config-row"><div><span>Today</span><strong>+1,840</strong></div><div><span>Payments</span><strong>17</strong></div><div><span>Fees</span><strong>6 sats</strong></div></div></>}
+          {view === 'customers' && <><p>People returning because payment automatically records progress.</p><div className="presentation-config-row"><div><span>Active</span><strong>18</strong></div><div><span>Rewards</span><strong>6</strong></div><div><span>Return rate</span><strong>42%</strong></div></div></>}
         </article>
         <div className="presentation-metrics">
           <article><strong>24</strong><span>customers enrolled</span></article>
@@ -198,20 +208,20 @@ function ArchitectureSlide() {
   const layers = [
     {
       title: 'React + Vite',
-      copy: 'Role-based UI, wallet onboarding, and payment feedback.',
-      detail: 'Customers discover businesses, connect their ndebit, approve purchases, and see stamps. Merchants configure their noffer and inspect activity.',
+      copy: 'Role-based UI, embedded wallet, and payment feedback.',
+      detail: 'Customers create or connect a wallet, receive and send sats, discover businesses, and see stamps. Merchants manage their wallet, program, and activity.',
       output: 'Intent + clear payment status',
     },
     {
       title: 'Express + TypeScript',
-      copy: 'Authentication, discovery, and payment orchestration.',
-      detail: 'The API validates ownership, applies idempotency, coordinates CLINK requests, and translates protocol outcomes into explicit domain states.',
+      copy: 'Authentication, wallet providers, and payment orchestration.',
+      detail: 'The API encrypts hosted credentials, applies idempotency, coordinates CLINK and Lightning.Pub RPC, and translates outcomes into explicit domain states.',
       output: 'A safe transaction state',
     },
     {
       title: 'Prisma + PostgreSQL',
-      copy: 'Transactions, loyalty cards, rewards, and constraints.',
-      detail: 'PostgreSQL stores the durable business truth. A database transaction records the paid purchase and grants exactly one stamp.',
+      copy: 'Wallet references, transactions, cards, and rewards.',
+      detail: 'PostgreSQL stores app state and encrypted wallet references—not the shared Lightning ledger. A database transaction grants exactly one stamp.',
       output: 'Auditable loyalty progress',
     },
   ];
@@ -239,11 +249,11 @@ function ArchitectureSlide() {
           ))}
         </div>
         <div className="presentation-architecture-bridge" aria-hidden="true">
-          <span>CLINK SDK</span><i /><span>Nostr relays</span>
+          <span>CLINK + RPC</span><i /><span>Nostr relays</span>
         </div>
         <div className="presentation-lightning-edge">
-          <article><small>Receive</small><strong>Lightning.Pub</strong><span>noffer1…</span></article>
-          <article><small>Pay</small><strong>ShockWallet</strong><span>ndebit1…</span></article>
+          <article><small>Hosted accounts</small><strong>Lightning.Pub</strong><span>One shared node</span></article>
+          <article><small>Portable option</small><strong>External wallet</strong><span>noffer · ndebit</span></article>
         </div>
       </div>
       <div className="presentation-diagram-detail is-architecture" aria-live="polite">
@@ -258,38 +268,38 @@ function ArchitectureSlide() {
 function ClinkSlide() {
   const events = [
     {
-      title: 'Purchase intent',
-      actor: 'Customer → Lightning Rewards',
-      message: 'Business ID, amount, and idempotency key',
-      explanation: 'The customer chooses a business and amount. No invoice exists yet, so no funds can move at this point.',
-      safety: 'The idempotency key prevents a repeated request from becoming a second purchase.',
+      title: 'Enroll account',
+      actor: 'Lightning Rewards → Lightning.Pub',
+      message: 'Encrypted Nostr event · kind 21004',
+      explanation: 'Nenroll binds a unique user identity to an isolated account and returns its noffer, ndebit, and nmanage pointers.',
+      safety: 'Every user receives a distinct signing identity and account. No channels are opened per user.',
     },
     {
-      title: 'Noffer request',
+      title: 'Request invoice',
       actor: 'Lightning Rewards → Lightning.Pub',
       message: 'Encrypted Nostr event · kind 21001',
       explanation: 'The merchant noffer identifies where invoice requests should go. Lightning.Pub validates the amount and asks its LND node to create a BOLT11 invoice.',
       safety: 'A noffer can receive payment requests, but it cannot spend merchant funds.',
     },
     {
-      title: 'Invoice response',
-      actor: 'Lightning.Pub → Lightning Rewards',
-      message: 'BOLT11 invoice over Nostr',
-      explanation: 'The merchant wallet returns a real invoice containing the amount, destination, expiry, and payment hash.',
-      safety: 'Lightning Rewards checks that the response matches the original request before continuing.',
+      title: 'Choose payer',
+      actor: 'Wallet provider → Lightning Rewards',
+      message: 'Embedded RPC or external ndebit',
+      explanation: 'The same purchase service selects the active provider. Hosted accounts use Lightning.Pub RPC; connected wallets use their CLINK debit.',
+      safety: 'Provider capabilities are explicit, keeping wallet-specific behavior outside loyalty logic.',
     },
     {
-      title: 'Ndebit request',
-      actor: 'Lightning Rewards → ShockWallet',
-      message: 'Encrypted Nostr event · kind 21002',
-      explanation: 'The customer ndebit identifies the wallet allowed to receive debit requests. ShockWallet shows the invoice for approval or evaluates the configured budget.',
-      safety: 'The customer controls permission and budget. The app never receives a seed phrase or private wallet key.',
+      title: 'Pay invoice',
+      actor: 'Customer account → Business account',
+      message: 'Lightning settlement · internal or routed',
+      explanation: 'Lightning.Pub can settle between its own accounts or route over LND. An external wallet follows the normal Lightning path.',
+      safety: 'A 10,000 sat application limit reduces risk during the hosted-wallet MVP.',
     },
     {
-      title: 'Settlement result',
-      actor: 'ShockWallet → Lightning Rewards',
+      title: 'Grant loyalty',
+      actor: 'Payment truth → PostgreSQL',
       message: 'OK + preimage, rejected, or unknown',
-      explanation: 'ShockWallet pays the merchant invoice over Lightning and returns the result through Nostr. The preimage proves settlement.',
+      explanation: 'The verified payment result moves the transaction to PAID. Only then does the loyalty service grant the next stamp.',
       safety: 'Only confirmed settlement grants a stamp. A timeout becomes UNKNOWN and is never treated as success.',
     },
   ];
@@ -323,13 +333,13 @@ function ClinkSlide() {
     <div>
       <SlideHeading
         eyebrow="How CLINK works"
-        title="Offers receive. Debits pay. Nostr connects them."
-        description="Select a step—or run the flow—to see exactly what travels between the wallets and the app."
+        title="Enroll creates the account. Offers and debits keep it portable."
+        description="Select a step—or run the flow—to see how hosted and external wallets share one loyalty payment contract."
       />
       <div className="presentation-clink-lab">
         <div className="presentation-clink-toolbar">
           <div className="presentation-clink-actors" aria-label="CLINK participants">
-            <span>ShockWallet</span><i>↔</i><strong>Lightning Rewards</strong><i>↔</i><span>Lightning.Pub</span>
+            <span>Any CLINK wallet</span><i>↔</i><strong>Lightning Rewards</strong><i>↔</i><span>Lightning.Pub</span>
           </div>
           <button type="button" onClick={playFlow} disabled={isPlaying}>
             {isPlaying ? 'Running flow…' : 'Run payment flow'}
@@ -360,9 +370,10 @@ function ClinkSlide() {
         </article>
       </div>
       <div className="presentation-clink-glossary">
+        <div><code>Nenroll</code><span>Creates or recovers one account and its three CLINK pointers.</span></div>
         <div><code>noffer</code><span>A public pointer used to request invoices from the merchant wallet.</span></div>
         <div><code>ndebit</code><span>A customer-controlled permission to send payment requests to a wallet.</span></div>
-        <div><code>Nostr relay</code><span>The message transport. It carries encrypted requests—not the Lightning payment.</span></div>
+        <div><code>Pub RPC</code><span>Provides hosted balance, invoices, payments, and account history over Nostr.</span></div>
       </div>
     </div>
   );
@@ -397,25 +408,25 @@ function DemoSlide() {
   return (
     <div>
       <SlideHeading
-        eyebrow="Live demo"
-        title="Let’s watch one payment travel through the entire system."
+        eyebrow="Hackathon demo strategy"
+        title="A reliable product story—with a real core and a deterministic vision."
       />
       <div className="presentation-demo-grid">
         <ol>
           {[
-            'Verify the business noffer is available.',
-            'Connect the customer ShockWallet ndebit.',
-            'Discover Lightning Coffee and pay.',
-            'Approve the CLINK request in ShockWallet.',
-            'See the stamp and business transaction appear.',
+            'Create a hosted account in the onboarding prototype.',
+            'Receive and send from the interactive wallet surface.',
+            'Run the customer-to-business purchase simulation.',
+            'Explain one Pub serving many isolated accounts.',
+            'Open the working loyalty app for the real CLINK core.',
           ].map((step, index) => (
             <li key={step}><span>{index + 1}</span>{step}</li>
           ))}
         </ol>
         <div className="presentation-demo-panel">
-          <span className="presentation-live-dot">Live</span>
-          <h3>Ready to leave the slides?</h3>
-          <p>The same application powers both the presentation and the working demo.</p>
+          <span className="presentation-live-dot">Hybrid demo</span>
+          <h3>Vision without demo risk.</h3>
+          <p>Wallet screens use transparent, deterministic mock data. Authentication, business discovery, CLINK payments, idempotency, and loyalty persistence remain grounded in the working application.</p>
           <div>
             <Link to="/login" state={{ from: '/business/settings' }}>Business login</Link>
             <Link to="/login" state={{ from: '/customer/discover' }}>Customer login</Link>
@@ -447,10 +458,14 @@ export const PRESENTATION_SLIDES = [
   { id: 'problem', title: 'The problem', component: ProblemSlide, notes: 'Frame traditional loyalty as a checkout-friction problem and a data-integrity problem.' },
   { id: 'solution', title: 'The product', component: SolutionSlide, notes: 'Explain the three outcomes of one payment: settlement, stamp, and visibility.' },
   { id: 'customer', title: 'Customer journey', component: CustomerSlide, notes: 'Walk through the customer experience. The debit is connected once; approval can be manual or budget-based.' },
+  { id: 'wallet-onboarding', title: 'Wallet onboarding', component: WalletOnboardingSlide, notes: 'Run Create my wallet. Explain that one unique Nostr key calls Nenroll and receives noffer, ndebit, and nmanage without manual configuration.' },
+  { id: 'embedded-wallet', title: 'Embedded wallet', component: EmbeddedWalletSlide, notes: 'Explore Overview, Receive, Send, and Activity. This is deterministic prototype data representing the Lightning.Pub RPC experience.' },
+  { id: 'loyalty-simulation', title: 'Wallet purchase', component: LoyaltySimulationSlide, notes: 'Run the purchase and narrate invoice creation, hosted payment, settlement, and the atomic fifth stamp.' },
   { id: 'business', title: 'Business journey', component: BusinessSlide, notes: 'The business defines the offer and reward, then observes customers and transactions.' },
+  { id: 'multi-wallet', title: 'One Pub, many wallets', component: MultiWalletArchitectureSlide, notes: 'Select accounts. Balances and identities are isolated, while LND channels and liquidity are shared.' },
   { id: 'architecture', title: 'Architecture', component: ArchitectureSlide, notes: 'Separate the conventional web stack from the CLINK payment edge. Emphasize that Postgres stores business truth.' },
-  { id: 'clink', title: 'CLINK protocol', component: ClinkSlide, notes: 'Describe noffer and ndebit as permissioned Nostr pointers. We never custody funds or wallet seeds.' },
+  { id: 'clink', title: 'CLINK protocol', component: ClinkSlide, notes: 'Explain the split: CLINK Enroll and pointers provide portability; Lightning.Pub RPC provides the complete hosted-wallet interface.' },
   { id: 'reliability', title: 'Reliability', component: ReliabilitySlide, notes: 'This is the technical credibility slide: explicit states, idempotency, and database constraints.' },
-  { id: 'demo', title: 'Live demo', component: DemoSlide, notes: 'Switch to the real app and execute one end-to-end payment. Check the wallet before retrying an unknown result.' },
+  { id: 'demo', title: 'Demo strategy', component: DemoSlide, notes: 'Be explicit: the wallet vision is a deterministic interactive prototype, while the existing loyalty and CLINK core is working software.' },
   { id: 'closing', title: 'Closing', component: ClosingSlide, notes: 'Close with the value for both sides and invite questions.' },
 ];
