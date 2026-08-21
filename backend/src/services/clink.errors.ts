@@ -36,7 +36,7 @@ const offerMessages: Record<number, string> = {
 };
 
 const debitMessages: Record<number, string> = {
-  1: 'La wallet rechazó la solicitud de pago.',
+  1: 'The payment was not approved in your wallet.',
   2: 'La wallet no pudo procesar el pago temporalmente.',
   3: 'La solicitud de pago expiró.',
   4: 'La wallet limitó temporalmente las solicitudes.',
@@ -56,7 +56,7 @@ export const offerResponseError = (code: number, cause?: unknown) =>
 export const debitResponseError = (code: number, cause?: unknown) =>
   new ClinkServiceError({
     operation: 'debit',
-    code: `CLINK_DEBIT_${code}`,
+    code: code === 1 ? 'CLINK_DEBIT_DENIED' : `CLINK_DEBIT_${code}`,
     publicMessage: debitMessages[code] ?? 'La wallet rechazó la solicitud de pago.',
     retryable: false,
     cause,

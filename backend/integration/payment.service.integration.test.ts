@@ -108,19 +108,30 @@ test('returns the original transaction for an idempotent replay', async () => {
   expect(clink.requestDebitPayment).toHaveBeenCalledTimes(1);
 });
 
-test('persists a definitive debit rejection as failed', async () => {
+test('persists a customer denial as failed with a distinct outcome', async () => {
   clink.requestDebitPayment.mockRejectedValueOnce(
     new ClinkServiceError({
       operation: 'debit',
-      code: 'CLINK_DEBIT_1',
-      publicMessage: 'La wallet rechazó la solicitud de pago.',
+      code: 'CLINK_DEBIT_DENIED',
+      publicMessage: 'The payment was not approved in your wallet.',
     }),
   );
 
-  const result = await paymentService.purchase(purchaseInput('failed'));
+  const input = purchaseInput('denied');
+  const result = await paymentService.purchase(input);
+  const replay = await paymentService.purchase(input);
 
-  expect(result).toMatchObject({ outcome: 'failed', code: 'CLINK_DEBIT_1' });
+  expect(result).toMatchObject({
+    outcome: 'denied',
+    code: 'CLINK_DEBIT_DENIED',
+    message: 'The payment was not approved in your wallet.',
+  });
+  expect(replay).toMatchObject({
+    outcome: 'denied',
+    code: 'CLINK_DEBIT_DENIED',
+  });
   expect(result.transaction.status).toBe(TransactionStatus.FAILED);
+  expect(replay.transaction.id).toBe(result.transaction.id);
 });
 
 test('persists an indeterminate debit timeout as unknown', async () => {
