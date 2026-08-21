@@ -1,22 +1,38 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { findMockBusinessForUser, updateBusiness } from '../../lib/mockStore';
+import { getOwnedBusinessRequest, updateOwnedBusinessRequest } from '../../lib/api';
 import FormField from '../../components/FormField';
-import BackendDataPending from '../../components/BackendDataPending';
 
 function Settings() {
-  const { user } = useAuth();
-  const business = findMockBusinessForUser(user);
-
-  const [stampsRequired, setStampsRequired] = useState(business?.stampsRequired ?? 5);
-  const [rewardDescription, setRewardDescription] = useState(business?.rewardDescription ?? '');
-  const [nofferString, setNofferString] = useState(business?.nofferString ?? '');
+  const { token } = useAuth();
+  const [stampsRequired, setStampsRequired] = useState('');
+  const [rewardDescription, setRewardDescription] = useState('');
+  const [nofferString, setNofferString] = useState('');
   const [status, setStatus] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!business) {
-    return <BackendDataPending title="Settings" />;
-  }
+  useEffect(() => {
+    let active = true;
+
+    getOwnedBusinessRequest(token)
+      .then(({ business }) => {
+        if (!active) return;
+        setStampsRequired(String(business.stampsRequired));
+        setRewardDescription(business.rewardDescription);
+        setNofferString(business.nofferString);
+      })
+      .catch((requestError) => {
+        if (active) setStatus({ type: 'error', message: requestError.message });
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [token]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -24,11 +40,14 @@ function Settings() {
     setIsSubmitting(true);
 
     try {
-      await updateBusiness(business.id, {
+      const result = await updateOwnedBusinessRequest({
         stampsRequired: Number(stampsRequired),
         rewardDescription,
         nofferString,
-      });
+      }, token);
+      setStampsRequired(String(result.business.stampsRequired));
+      setRewardDescription(result.business.rewardDescription);
+      setNofferString(result.business.nofferString);
       setStatus({ type: 'success', message: 'Program updated.' });
     } catch (err) {
       setStatus({ type: 'error', message: err.message });
@@ -41,6 +60,9 @@ function Settings() {
     <div className="max-w-md">
       <h1 className="text-2xl font-bold text-neutral-900">Settings</h1>
 
+      {isLoading ? (
+        <p className="mt-6 text-neutral-500">Loading settings…</p>
+      ) : (
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <FormField
           id="stampsRequired"
@@ -78,6 +100,7 @@ function Settings() {
           {isSubmitting ? 'Saving…' : 'Save changes'}
         </button>
       </form>
+      )}
     </div>
   );
 }

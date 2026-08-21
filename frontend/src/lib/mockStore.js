@@ -80,13 +80,6 @@ const persist = () => {
   }
 };
 
-const toPublicUser = (user) => ({
-  id: user.id,
-  email: user.email,
-  role: user.role,
-  ndebitString: user.ndebitString,
-});
-
 const withMyProgress = (business, customerId) => {
   if (!customerId) return { ...business, myProgress: null };
 
@@ -113,44 +106,10 @@ export const getBusinessById = (businessId) => {
   return business;
 };
 
-export const getBusinessByOwnerId = (ownerId) => {
-  const business = state.businesses.find((candidate) => candidate.ownerId === ownerId);
-  if (!business) throw new Error('Business not found');
-  return business;
-};
-
-export const findMockBusinessForUser = (user) => {
-  const mockOwner = state.users.find(
-    (candidate) => candidate.id === user.id || candidate.email === user.email,
-  );
-
-  if (!mockOwner) return null;
-  return state.businesses.find((candidate) => candidate.ownerId === mockOwner.id) ?? null;
-};
-
-export const updateBusiness = async (businessId, updates) => {
-  const business = state.businesses.find((candidate) => candidate.id === businessId);
-  if (!business) throw new Error('Business not found');
-
-  Object.assign(business, updates);
-  persist();
-  return business;
-};
-
 export const getCustomerCards = (customerId) =>
   state.loyaltyCards
     .filter((card) => card.customerId === customerId)
     .map((card) => ({ ...card, business: getBusinessById(card.businessId) }));
-
-export const getBusinessCustomers = (businessId) =>
-  state.loyaltyCards
-    .filter((card) => card.businessId === businessId)
-    .map((card) => ({ ...card, customer: toPublicUser(state.users.find((user) => user.id === card.customerId)) }));
-
-export const getBusinessTransactions = (businessId) =>
-  state.transactions
-    .filter((transaction) => transaction.businessId === businessId)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
 const fakeBolt11 = (amountSats) => `lnbcmock${amountSats * 1000}${generateId('x')}`;
 const fakePreimage = () => generateId('preimage').replace(/-/g, '');

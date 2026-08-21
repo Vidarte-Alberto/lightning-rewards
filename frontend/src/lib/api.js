@@ -62,3 +62,19 @@ export const updateCustomerWalletRequest = (ndebitString, token) =>
     token,
     body: { ndebitString },
   });
+
+export const getOwnedBusinessRequest = (token) =>
+  apiRequest('/businesses/me', { token });
+
+export const updateOwnedBusinessRequest = (settings, token) =>
+  apiRequest('/businesses/me', {
+    method: 'PATCH',
+    token,
+    body: settings,
+  });
+
+export const getOwnedBusinessCustomersRequest = (token) =>
+  apiRequest('/businesses/me/customers', { token });
+
+export const getOwnedBusinessTransactionsRequest = (token) =>
+  apiRequest('/businesses/me/transactions', { token });
