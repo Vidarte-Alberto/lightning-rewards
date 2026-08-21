@@ -114,13 +114,13 @@ test('includes pointer and session k1 in a debit payment request', async () => {
   expect(calls.stop).toBe(1);
 });
 
-test('accepts an internal settlement without a preimage', async () => {
+test.each([undefined, ''])('accepts an internal settlement with preimage %j', async (preimage) => {
   const { module } = createFakeSdk({
     decoded: {
       type: 'ndebit',
       data: { pubkey: 'wallet-pubkey', relay: 'wss://relay.example.com' },
     },
-    debitResponse: { res: 'ok' },
+    debitResponse: { res: 'ok', preimage },
   });
 
   await expect(

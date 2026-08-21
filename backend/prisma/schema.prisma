@@ -82,21 +82,22 @@ model LoyaltyCard {
 }
 
 model Transaction {
-  id             String            @id @default(uuid())
-  idempotencyKey String            @unique
-  businessId     String
-  business       Business          @relation(fields: [businessId], references: [id], onDelete: Restrict)
-  customerId     String
-  customer       User              @relation("CustomerTransactions", fields: [customerId], references: [id], onDelete: Restrict)
-  amountSats     Int
-  bolt11         String?           @unique
-  preimage       String?           @unique
-  status         TransactionStatus @default(PENDING)
-  failureCode    String?
-  failureMessage String?
-  paidAt         DateTime?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  id               String            @id @default(uuid())
+  idempotencyKey   String            @unique
+  businessId       String
+  business         Business          @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  customerId       String
+  customer         User              @relation("CustomerTransactions", fields: [customerId], references: [id], onDelete: Restrict)
+  amountSats       Int
+  bolt11           String?           @unique
+  preimage         String?           @unique
+  status           TransactionStatus @default(PENDING)
+  failureCode      String?
+  failureMessage   String?
+  paidAt           DateTime?
+  loyaltyGrantedAt DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   reward Reward?
 

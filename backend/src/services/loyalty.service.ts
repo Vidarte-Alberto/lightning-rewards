@@ -1,11 +1,24 @@
 import prisma from '../db/prisma';
 import { AppError } from '../middlewares';
-import { Role, TransactionStatus, type PrismaClient } from '../generated/prisma/client';
+import {
+  Role,
+  TransactionStatus,
+  type LoyaltyCard,
+  type PrismaClient,
+  type Reward,
+} from '../generated/prisma/client';
 
 type AddStampInput = {
   businessId: string;
   customerId: string;
   transactionId?: string;
+};
+
+export type LoyaltyResult = {
+  card: LoyaltyCard;
+  reward: Reward | null;
+  rewardUnlocked: boolean;
+  stampsRequired: number;
 };
 
 type TransactionClient = Omit<
@@ -58,6 +71,7 @@ export const addStamp = async ({ businessId, customerId, transactionId }: AddSta
           businessId: true,
           customerId: true,
           status: true,
+          loyaltyGrantedAt: true,
         },
       });
 
@@ -71,6 +85,34 @@ export const addStamp = async ({ businessId, customerId, transactionId }: AddSta
         transaction.status !== TransactionStatus.PAID
       ) {
         throw new AppError(400, 'transaction cannot receive a loyalty stamp');
+      }
+
+      const claim = await tx.transaction.updateMany({
+        where: {
+          id: transactionId,
+          loyaltyGrantedAt: null,
+        },
+        data: { loyaltyGrantedAt: new Date() },
+      });
+
+      if (claim.count === 0) {
+        const [card, reward] = await Promise.all([
+          tx.loyaltyCard.findUnique({
+            where: { businessId_customerId: { businessId, customerId } },
+          }),
+          tx.reward.findUnique({ where: { transactionId } }),
+        ]);
+
+        if (!card) {
+          throw new AppError(409, 'loyalty stamp state is inconsistent');
+        }
+
+        return {
+          card,
+          reward,
+          rewardUnlocked: reward !== null,
+          stampsRequired: business.stampsRequired,
+        } satisfies LoyaltyResult;
       }
     }
 
@@ -122,7 +164,7 @@ export const addStamp = async ({ businessId, customerId, transactionId }: AddSta
       reward,
       rewardUnlocked,
       stampsRequired: business.stampsRequired,
-    };
+    } satisfies LoyaltyResult;
   });
 };
 

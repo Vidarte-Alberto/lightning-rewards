@@ -81,6 +81,23 @@ test('rejects a paid transaction without payment evidence', async () => {
   ).rejects.toThrow();
 });
 
+test('rejects blank payment preimages', async () => {
+  await expect(
+    prisma.transaction.create({
+      data: {
+        idempotencyKey: `blank-preimage-${testId}`,
+        businessId,
+        customerId,
+        amountSats: 100,
+        bolt11: `blank-preimage-invoice-${testId}`,
+        preimage: '   ',
+        status: TransactionStatus.PAID,
+        paidAt: new Date(),
+      },
+    }),
+  ).rejects.toThrow();
+});
+
 test('rejects duplicate idempotency keys', async () => {
   const idempotencyKey = `duplicate-${testId}`;
 

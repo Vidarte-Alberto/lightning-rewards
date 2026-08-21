@@ -6,6 +6,7 @@ import { Role } from '../generated/prisma/client';
 import { asyncHandler, requireAuth, requireRole } from '../middlewares';
 import {
   ClinkService,
+  addStamp,
   checkOwnedBusinessOffer,
   getBusinessCustomers,
   getBusinessDetail,
@@ -25,7 +26,7 @@ const clinkService = new ClinkService({
   privateKeyHex: config.clinkPrivateKey,
   timeoutSeconds: config.clinkTimeoutSeconds,
 });
-const paymentService = new PaymentService(prisma, clinkService);
+const paymentService = new PaymentService(prisma, clinkService, { addStamp });
 
 router.post(
   '/auth/register',
@@ -50,6 +51,29 @@ router.patch(
   asyncHandler(async (req, res) => {
     const user = await updateCustomerProfile(req.user.id, req.body);
     res.json({ user });
+  }),
+);
+
+router.get(
+  '/customers/me/businesses',
+  requireAuth,
+  requireRole(Role.CUSTOMER),
+  asyncHandler(async (req, res) => {
+    const businesses = await listBusinesses({
+      ...req.query,
+      customerId: req.user.id,
+    });
+    res.json({ businesses });
+  }),
+);
+
+router.get(
+  '/customers/me/cards',
+  requireAuth,
+  requireRole(Role.CUSTOMER),
+  asyncHandler(async (req, res) => {
+    const cards = await getCustomerCards(req.user.id);
+    res.json({ cards });
   }),
 );
 

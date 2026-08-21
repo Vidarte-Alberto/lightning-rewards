@@ -81,3 +81,19 @@ export const getOwnedBusinessTransactionsRequest = (token) =>
 
 export const checkOwnedBusinessOfferRequest = (token) =>
   apiRequest('/businesses/me/offer-test', { method: 'POST', token });
+
+export const getCustomerBusinessesRequest = (token) =>
+  apiRequest('/customers/me/businesses', { token });
+
+export const getCustomerCardsRequest = (token) =>
+  apiRequest('/customers/me/cards', { token });
+
+export const getBusinessRequest = (businessId) =>
+  apiRequest(`/businesses/${encodeURIComponent(businessId)}`);
+
+export const createPurchaseRequest = (purchase, token) =>
+  apiRequest('/payments/purchase', {
+    method: 'POST',
+    token,
+    body: purchase,
+  });
