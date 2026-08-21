@@ -4,6 +4,7 @@ import type { Mocked } from 'vitest';
 import { Role, TransactionStatus } from '../src/generated/prisma/client';
 import prisma from '../src/db/prisma';
 import { ClinkServiceError } from '../src/services/clink.errors';
+import { addStamp } from '../src/services/loyalty.service';
 import {
   PaymentService,
   type ClinkPaymentPort,
@@ -21,7 +22,7 @@ const clink: Mocked<ClinkPaymentPort> = {
   requestDebitPayment: vi.fn(),
 };
 
-const paymentService = new PaymentService(prisma, clink);
+const paymentService = new PaymentService(prisma, clink, { addStamp });
 
 const purchaseInput = (suffix: string): PurchaseInput => ({
   businessId,
@@ -96,6 +97,10 @@ test('persists a successful CLINK payment as paid', async () => {
   });
   expect(result.transaction.bolt11).toMatch(/^lnbc-integration-/);
   expect(result.transaction.paidAt).toBeInstanceOf(Date);
+  expect(result.loyalty).toMatchObject({
+    rewardUnlocked: false,
+    card: { currentStamps: 1, totalStampsEver: 1 },
+  });
 });
 
 test('returns the original transaction for an idempotent replay', async () => {
@@ -104,6 +109,7 @@ test('returns the original transaction for an idempotent replay', async () => {
   const second = await paymentService.purchase(input);
 
   expect(second.transaction.id).toBe(first.transaction.id);
+  expect(second.loyalty?.card.totalStampsEver).toBe(first.loyalty?.card.totalStampsEver);
   expect(clink.requestInvoiceFromOffer).toHaveBeenCalledTimes(1);
   expect(clink.requestDebitPayment).toHaveBeenCalledTimes(1);
 });

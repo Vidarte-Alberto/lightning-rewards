@@ -6,6 +6,7 @@ import {
 } from '../generated/prisma/client';
 import { ClinkServiceError } from './clink.errors';
 import type { DebitPaymentResult } from './clink.service';
+import type { LoyaltyResult } from './loyalty.service';
 import { PaymentServiceError } from './payment.errors';
 
 export type PurchaseInput = {
@@ -22,6 +23,7 @@ export type PurchaseResult = {
   transaction: Transaction;
   code?: string;
   message?: string;
+  loyalty?: LoyaltyResult;
 };
 
 export type ClinkPaymentPort = {
@@ -38,6 +40,14 @@ export type ClinkPaymentPort = {
   ): Promise<DebitPaymentResult>;
 };
 
+export type LoyaltyPort = {
+  addStamp(input: {
+    businessId: string;
+    customerId: string;
+    transactionId: string;
+  }): Promise<LoyaltyResult>;
+};
+
 const statusOutcome: Record<TransactionStatus, PurchaseOutcome> = {
   [TransactionStatus.PENDING]: 'pending',
   [TransactionStatus.PAID]: 'paid',
@@ -49,6 +59,7 @@ export class PaymentService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly clink: ClinkPaymentPort,
+    private readonly loyalty?: LoyaltyPort,
   ) {}
 
   async purchase(input: PurchaseInput): Promise<PurchaseResult> {
@@ -72,17 +83,17 @@ export class PaymentService {
     ]);
 
     if (!business || !business.isActive) {
-      throw new PaymentServiceError('BUSINESS_NOT_AVAILABLE', 'El negocio no está disponible.', 404);
+      throw new PaymentServiceError('BUSINESS_NOT_AVAILABLE', 'The business is not available.', 404);
     }
 
     if (!customer || !customer.isActive || customer.role !== Role.CUSTOMER) {
-      throw new PaymentServiceError('CUSTOMER_NOT_AVAILABLE', 'El cliente no está disponible.', 403);
+      throw new PaymentServiceError('CUSTOMER_NOT_AVAILABLE', 'The customer is not available.', 403);
     }
 
     if (!customer.ndebitString) {
       throw new PaymentServiceError(
         'WALLET_NOT_CONNECTED',
-        'Conecta una wallet antes de realizar la compra.',
+        'Connect a wallet before making a purchase.',
         409,
       );
     }
@@ -93,7 +104,7 @@ export class PaymentService {
     }
 
     const transaction = pendingTransaction.transaction;
-    const description = `Compra en ${business.name}`.slice(0, 100);
+    const description = `Purchase at ${business.name}`.slice(0, 100);
 
     let bolt11: string;
     try {
@@ -132,27 +143,27 @@ export class PaymentService {
       },
     });
 
-    return { outcome: 'paid', transaction: paidTransaction };
+    return this.completePaidPurchase(paidTransaction);
   }
 
   private validateInput(input: PurchaseInput) {
     if (!input.businessId.trim()) {
-      throw new PaymentServiceError('INVALID_BUSINESS_ID', 'El negocio es obligatorio.', 400);
+      throw new PaymentServiceError('INVALID_BUSINESS_ID', 'The business is required.', 400);
     }
 
     if (!input.customerId.trim()) {
-      throw new PaymentServiceError('INVALID_CUSTOMER_ID', 'El cliente es obligatorio.', 400);
+      throw new PaymentServiceError('INVALID_CUSTOMER_ID', 'The customer is required.', 400);
     }
 
     if (!Number.isSafeInteger(input.amountSats) || input.amountSats <= 0 || input.amountSats > 2_147_483_647) {
-      throw new PaymentServiceError('INVALID_AMOUNT', 'El monto debe ser un entero positivo en sats.', 400);
+      throw new PaymentServiceError('INVALID_AMOUNT', 'The amount must be a positive integer in sats.', 400);
     }
 
     const idempotencyKey = input.idempotencyKey.trim();
     if (!idempotencyKey || idempotencyKey.length > 128) {
       throw new PaymentServiceError(
         'INVALID_IDEMPOTENCY_KEY',
-        'La clave de idempotencia no es válida.',
+        'The idempotency key is invalid.',
         400,
       );
     }
@@ -181,8 +192,16 @@ export class PaymentService {
     }
   }
 
-  private existingResult(transaction: Transaction, input: PurchaseInput): PurchaseResult {
+  private async existingResult(
+    transaction: Transaction,
+    input: PurchaseInput,
+  ): Promise<PurchaseResult> {
     this.assertSamePurchase(transaction, input);
+
+    if (transaction.status === TransactionStatus.PAID) {
+      return this.completePaidPurchase(transaction);
+    }
+
     return {
       outcome:
         transaction.status === TransactionStatus.FAILED &&
@@ -195,6 +214,22 @@ export class PaymentService {
     };
   }
 
+  private async completePaidPurchase(transaction: Transaction): Promise<PurchaseResult> {
+    const loyalty = this.loyalty
+      ? await this.loyalty.addStamp({
+          businessId: transaction.businessId,
+          customerId: transaction.customerId,
+          transactionId: transaction.id,
+        })
+      : undefined;
+
+    return {
+      outcome: 'paid',
+      transaction,
+      ...(loyalty && { loyalty }),
+    };
+  }
+
   private assertSamePurchase(transaction: Transaction, input: PurchaseInput) {
     if (
       transaction.businessId !== input.businessId ||
@@ -203,7 +238,7 @@ export class PaymentService {
     ) {
       throw new PaymentServiceError(
         'IDEMPOTENCY_CONFLICT',
-        'La clave de idempotencia ya fue utilizada para otra compra.',
+        'The idempotency key was already used for another purchase.',
         409,
       );
     }
@@ -235,7 +270,7 @@ export class PaymentService {
         : new ClinkServiceError({
             operation: debitWasRequested ? 'debit' : 'offer',
             code: 'CLINK_UNEXPECTED_ERROR',
-            publicMessage: 'No se pudo completar la operación Lightning.',
+            publicMessage: 'The Lightning operation could not be completed.',
             indeterminate: debitWasRequested,
             cause: error,
           });

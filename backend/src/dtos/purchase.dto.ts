@@ -11,23 +11,23 @@ export const purchaseInputFromRequest = (
   customerId: string,
 ): PurchaseInput => {
   if (!body || typeof body !== 'object') {
-    throw new PaymentServiceError('INVALID_BODY', 'El cuerpo de la solicitud no es válido.', 400);
+    throw new PaymentServiceError('INVALID_BODY', 'The request body is invalid.', 400);
   }
 
   const purchaseBody = body as PurchaseBody;
 
   if (typeof purchaseBody.businessId !== 'string') {
-    throw new PaymentServiceError('INVALID_BUSINESS_ID', 'El negocio es obligatorio.', 400);
+    throw new PaymentServiceError('INVALID_BUSINESS_ID', 'The business is required.', 400);
   }
 
   if (typeof purchaseBody.amountSats !== 'number') {
-    throw new PaymentServiceError('INVALID_AMOUNT', 'El monto debe expresarse en sats.', 400);
+    throw new PaymentServiceError('INVALID_AMOUNT', 'The amount must be expressed in sats.', 400);
   }
 
   if (typeof purchaseBody.idempotencyKey !== 'string') {
     throw new PaymentServiceError(
       'INVALID_IDEMPOTENCY_KEY',
-      'La clave de idempotencia es obligatoria.',
+      'The idempotency key is required.',
       400,
     );
   }

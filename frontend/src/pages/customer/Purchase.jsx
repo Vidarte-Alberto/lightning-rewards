@@ -1,18 +1,86 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { getBusinessById, purchase } from '../../lib/mockStore';
 import FormField from '../../components/FormField';
+import { useAuth } from '../../context/AuthContext';
+import { createPurchaseRequest, getBusinessRequest } from '../../lib/api';
+
+const newIdempotencyKey = () => {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
 
 function Purchase() {
   const { businessId } = useParams();
-  const { user } = useAuth();
-  const business = getBusinessById(businessId);
-
+  const { user, token } = useAuth();
+  const [business, setBusiness] = useState(null);
   const [amountSats, setAmountSats] = useState('1000');
-  const [status, setStatus] = useState('form');
+  const [status, setStatus] = useState('loading');
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [idempotencyKey, setIdempotencyKey] = useState(newIdempotencyKey);
+  const [startsNewAttempt, setStartsNewAttempt] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    getBusinessRequest(businessId)
+      .then((response) => {
+        if (!active) return;
+        setBusiness(response.business);
+        setStatus('form');
+      })
+      .catch((requestError) => {
+        if (!active) return;
+        setError(requestError.message);
+        setStatus('load-error');
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [businessId]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError(null);
+    setStartsNewAttempt(false);
+    setStatus('pending');
+
+    try {
+      const purchaseResult = await createPurchaseRequest(
+        {
+          businessId,
+          amountSats: Number(amountSats),
+          idempotencyKey,
+        },
+        token,
+      );
+      setResult(purchaseResult);
+      setStatus(purchaseResult.outcome === 'paid' ? 'success' : 'unconfirmed');
+    } catch (requestError) {
+      setError(requestError.message);
+      setStartsNewAttempt(
+        typeof requestError.status === 'number' && requestError.status !== 500,
+      );
+      setStatus('failure');
+    }
+  };
+
+  const retry = () => {
+    if (startsNewAttempt) setIdempotencyKey(newIdempotencyKey());
+    setStatus('form');
+  };
+
+  if (status === 'loading') {
+    return <p className="text-neutral-500">Loading business…</p>;
+  }
+
+  if (status === 'load-error') {
+    return <p className="text-red-600" role="alert">{error}</p>;
+  }
 
   if (!user.ndebitString) {
     return (
@@ -23,7 +91,7 @@ function Purchase() {
         </p>
         <Link
           to="/customer/wallet"
-          className="mt-6 inline-block px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-700 transition-colors"
+          className="mt-6 inline-block rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700"
         >
           Connect wallet
         </Link>
@@ -31,29 +99,10 @@ function Purchase() {
     );
   }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError(null);
-    setStatus('pending');
-
-    try {
-      const purchaseResult = await purchase({
-        businessId,
-        customerId: user.id,
-        amountSats: Number(amountSats),
-      });
-      setResult(purchaseResult);
-      setStatus(purchaseResult.transaction.status === 'PAID' ? 'success' : 'failure');
-    } catch (err) {
-      setError(err.message);
-      setStatus('form');
-    }
-  };
-
   if (status === 'pending') {
     return (
-      <div className="max-w-md text-center py-16">
-        <div className="mx-auto w-12 h-12 rounded-full border-4 border-neutral-200 border-t-neutral-900 animate-spin" />
+      <div className="max-w-md py-16 text-center" role="status">
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-900" />
         <h1 className="mt-6 text-xl font-semibold text-neutral-900">Waiting for wallet approval…</h1>
         <p className="mt-2 text-neutral-600">Approve the payment in your Lightning wallet to continue.</p>
       </div>
@@ -62,19 +111,24 @@ function Purchase() {
 
   if (status === 'success') {
     return (
-      <div className="max-w-md text-center py-16">
+      <div className="max-w-md py-16 text-center">
         <h1 className="text-2xl font-bold text-neutral-900">Payment confirmed</h1>
         <p className="mt-2 text-neutral-600">You earned a stamp at {business.name}.</p>
-        {result.rewardUnlocked && (
+        {result.loyalty?.rewardUnlocked && (
           <p className="mt-4 text-lg font-semibold text-neutral-900">
-            🎉 Reward unlocked: {result.reward.description}
+            🎉 Reward unlocked: {result.loyalty.reward.description}
+          </p>
+        )}
+        {result.loyalty && !result.loyalty.rewardUnlocked && (
+          <p className="mt-3 text-sm text-neutral-600">
+            {result.loyalty.card.currentStamps}/{result.loyalty.stampsRequired} stamps collected
           </p>
         )}
         <div className="mt-6 flex justify-center gap-4">
-          <Link to="/customer/cards" className="px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-700 transition-colors">
+          <Link to="/customer/cards" className="rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700">
             View my cards
           </Link>
-          <Link to="/customer/discover" className="px-6 py-3 rounded-lg border border-neutral-300 text-neutral-900 font-medium hover:border-neutral-900 transition-colors">
+          <Link to="/customer/discover" className="rounded-lg border border-neutral-300 px-6 py-3 font-medium text-neutral-900 transition-colors hover:border-neutral-900">
             Discover more
           </Link>
         </div>
@@ -82,15 +136,30 @@ function Purchase() {
     );
   }
 
+  if (status === 'unconfirmed') {
+    return (
+      <div className="max-w-md py-16 text-center">
+        <h1 className="text-2xl font-bold text-neutral-900">Payment not confirmed</h1>
+        <p className="mt-2 text-neutral-600">
+          We could not confirm the final payment status. Check your wallet before trying again.
+        </p>
+        <Link to="/customer/discover" className="mt-6 inline-block rounded-lg border border-neutral-300 px-6 py-3 font-medium text-neutral-900 hover:border-neutral-900">
+          Back to Discover
+        </Link>
+      </div>
+    );
+  }
+
   if (status === 'failure') {
     return (
-      <div className="max-w-md text-center py-16">
+      <div className="max-w-md py-16 text-center">
         <h1 className="text-2xl font-bold text-neutral-900">Payment failed</h1>
-        <p className="mt-2 text-neutral-600">Your wallet declined the payment. No stamp was added.</p>
+        <p className="mt-2 text-neutral-600" role="alert">{error}</p>
+        <p className="mt-2 text-sm text-neutral-500">No stamp was added.</p>
         <button
           type="button"
-          onClick={() => setStatus('form')}
-          className="mt-6 px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-700 transition-colors"
+          onClick={retry}
+          className="mt-6 rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700"
         >
           Try again
         </button>
@@ -101,7 +170,9 @@ function Purchase() {
   return (
     <div className="max-w-md">
       <h1 className="text-2xl font-bold text-neutral-900">Buy from {business.name}</h1>
-      <p className="mt-2 text-neutral-600">{business.rewardDescription} every {business.stampsRequired} stamps.</p>
+      <p className="mt-2 text-neutral-600">
+        {business.rewardDescription} every {business.stampsRequired} stamps.
+      </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <FormField
@@ -109,16 +180,14 @@ function Purchase() {
           label="Amount (sats)"
           type="number"
           min="1"
+          step="1"
           required
           value={amountSats}
           onChange={(event) => setAmountSats(event.target.value)}
         />
-
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
         <button
           type="submit"
-          className="w-full px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-700 transition-colors"
+          className="w-full rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700"
         >
           Pay with Lightning
         </button>

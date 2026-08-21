@@ -105,7 +105,7 @@ const privateKeyFromHex = (privateKeyHex?: string) => {
     throw new ClinkServiceError({
       operation: 'offer',
       code: 'CLINK_CONFIGURATION',
-      publicMessage: 'El servicio de pagos no está configurado.',
+      publicMessage: 'The payment service is not configured.',
     });
   }
 
@@ -192,9 +192,11 @@ export class ClinkService {
         throw debitResponseError(response.code, response);
       }
 
+      const preimage = response.preimage?.trim() || undefined;
+
       return {
-        preimage: response.preimage,
-        internalSettlement: !response.preimage,
+        preimage,
+        internalSettlement: !preimage,
       };
     } catch (error: unknown) {
       if (error instanceof ClinkServiceError) throw error;
@@ -229,8 +231,8 @@ export class ClinkService {
         code: expectedType === 'noffer' ? 'CLINK_INVALID_NOFFER' : 'CLINK_INVALID_NDEBIT',
         publicMessage:
           expectedType === 'noffer'
-            ? 'La oferta Lightning del negocio no es válida.'
-            : 'La conexión Lightning de la wallet no es válida.',
+            ? 'The business Lightning offer is invalid.'
+            : 'The wallet Lightning connection is invalid.',
         cause: error,
       });
     }
@@ -243,9 +245,9 @@ export class ClinkService {
       code: timedOut ? `CLINK_${operation.toUpperCase()}_TIMEOUT` : `CLINK_${operation.toUpperCase()}_NETWORK`,
       publicMessage: timedOut
         ? operation === 'offer'
-          ? 'El negocio tardó demasiado en generar la factura.'
-          : 'No se pudo confirmar a tiempo el resultado del pago.'
-        : 'No se pudo comunicar con el servicio Lightning.',
+          ? 'The business took too long to generate the invoice.'
+          : 'The payment result could not be confirmed in time.'
+        : 'The Lightning service could not be reached.',
       retryable: operation === 'offer',
       indeterminate: operation === 'debit',
       cause,

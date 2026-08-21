@@ -101,6 +101,15 @@ test('adds stamps and unlocks a reward when the card reaches the required count'
   expect(firstResult.card.currentStamps).toBe(1);
   expect(firstResult.card.totalStampsEver).toBe(1);
 
+  const firstReplay = await addStamp({
+    businessId,
+    customerId,
+    transactionId: firstTransaction.id,
+  });
+
+  expect(firstReplay.card.totalStampsEver).toBe(1);
+  expect(firstReplay.rewardUnlocked).toBe(false);
+
   const secondTransaction = await createPaidTransaction(`second-${testId}`);
   const secondResult = await addStamp({
     businessId,

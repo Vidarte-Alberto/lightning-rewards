@@ -28,27 +28,27 @@ export class ClinkServiceError extends Error {
 }
 
 const offerMessages: Record<number, string> = {
-  1: 'La oferta del negocio no es válida o ya no está disponible.',
-  2: 'El negocio no puede generar la factura temporalmente.',
-  3: 'La oferta del negocio expiró o fue reemplazada.',
-  4: 'El negocio no soporta esta solicitud de pago.',
-  5: 'El monto está fuera del rango aceptado por el negocio.',
+  1: 'The business offer is invalid or no longer available.',
+  2: 'The business cannot generate an invoice right now.',
+  3: 'The business offer expired or was replaced.',
+  4: 'The business does not support this payment request.',
+  5: 'The amount is outside the range accepted by the business.',
 };
 
 const debitMessages: Record<number, string> = {
   1: 'The payment was not approved in your wallet.',
-  2: 'La wallet no pudo procesar el pago temporalmente.',
-  3: 'La solicitud de pago expiró.',
-  4: 'La wallet limitó temporalmente las solicitudes.',
-  5: 'El monto está fuera del rango autorizado por la wallet.',
-  6: 'La wallet recibió una solicitud de pago inválida.',
+  2: 'The wallet cannot process the payment right now.',
+  3: 'The payment request expired.',
+  4: 'The wallet temporarily limited payment requests.',
+  5: 'The amount is outside the range authorized by the wallet.',
+  6: 'The wallet received an invalid payment request.',
 };
 
 export const offerResponseError = (code: number, cause?: unknown) =>
   new ClinkServiceError({
     operation: 'offer',
     code: `CLINK_OFFER_${code}`,
-    publicMessage: offerMessages[code] ?? 'El negocio rechazó la solicitud de factura.',
+    publicMessage: offerMessages[code] ?? 'The business rejected the invoice request.',
     retryable: code === 2,
     cause,
   });
@@ -57,7 +57,7 @@ export const debitResponseError = (code: number, cause?: unknown) =>
   new ClinkServiceError({
     operation: 'debit',
     code: code === 1 ? 'CLINK_DEBIT_DENIED' : `CLINK_DEBIT_${code}`,
-    publicMessage: debitMessages[code] ?? 'La wallet rechazó la solicitud de pago.',
+    publicMessage: debitMessages[code] ?? 'The wallet rejected the payment request.',
     retryable: false,
     cause,
   });

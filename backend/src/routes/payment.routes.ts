@@ -15,7 +15,7 @@ export const createPaymentRouter = (paymentService: PaymentService) => {
   router.post('/purchase', async (request: Request, response: Response) => {
     try {
       if (!request.user) {
-        response.status(401).json({ error: { code: 'AUTH_REQUIRED', message: 'Autenticación requerida.' } });
+        response.status(401).json({ error: { code: 'AUTH_REQUIRED', message: 'Authentication is required.' } });
         return;
       }
 
@@ -25,6 +25,7 @@ export const createPaymentRouter = (paymentService: PaymentService) => {
       response.status(responseStatus(result)).json({
         outcome: result.outcome,
         transaction: result.transaction,
+        ...(result.loyalty && { loyalty: result.loyalty }),
         ...(result.code && { error: { code: result.code, message: result.message } }),
       });
     } catch (error: unknown) {
@@ -35,8 +36,10 @@ export const createPaymentRouter = (paymentService: PaymentService) => {
         return;
       }
 
+      console.error('Purchase request failed unexpectedly', error);
+
       response.status(500).json({
-        error: { code: 'INTERNAL_ERROR', message: 'No se pudo procesar la compra.' },
+        error: { code: 'INTERNAL_ERROR', message: 'The purchase could not be processed.' },
       });
     }
   });

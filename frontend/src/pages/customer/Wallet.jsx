@@ -11,8 +11,9 @@ function Wallet() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setStatus(null);
+    const normalizedNdebit = ndebitString.trim();
 
-    if (!ndebitString.startsWith('ndebit1')) {
+    if (!normalizedNdebit.startsWith('ndebit1')) {
       setStatus({ type: 'error', message: 'That doesn’t look like an ndebit string — it should start with "ndebit1".' });
       return;
     }
@@ -20,7 +21,8 @@ function Wallet() {
     setIsSubmitting(true);
 
     try {
-      await connectWallet(ndebitString);
+      await connectWallet(normalizedNdebit);
+      setNdebitString(normalizedNdebit);
       setStatus({ type: 'success', message: 'Wallet connected.' });
     } catch (err) {
       setStatus({ type: 'error', message: err.message });
