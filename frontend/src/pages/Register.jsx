@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { homeForRole, useAuth } from '../context/AuthContext';
 import FormField from '../components/FormField';
 
 const VALID_ROLES = ['business', 'customer'];
@@ -24,7 +24,7 @@ function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (user) {
-    return <Navigate to={user.role === 'BUSINESS' ? '/business/dashboard' : '/customer/discover'} replace />;
+    return <Navigate to={homeForRole(user.role)} replace />;
   }
 
   const handleSubmit = async (event) => {
@@ -34,7 +34,7 @@ function Register() {
 
     try {
       const registeredUser = await register({ role, email, password, name, category, nofferString, rewardDescription });
-      navigate(registeredUser.role === 'BUSINESS' ? '/business/dashboard' : '/customer/discover');
+      navigate(homeForRole(registeredUser.role), { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -62,8 +62,8 @@ function Register() {
           ))}
         </div>
 
-        <FormField id="email" label="Email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
-        <FormField id="password" label="Password" type="password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} />
+        <FormField id="email" label="Email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+        <FormField id="password" label="Password" type="password" autoComplete="new-password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} />
 
         {role === 'BUSINESS' && (
           <>
@@ -80,6 +80,7 @@ function Register() {
               id="nofferString"
               label="Noffer string"
               required
+              pattern="noffer1.*"
               placeholder="noffer1…"
               value={nofferString}
               onChange={(event) => setNofferString(event.target.value)}

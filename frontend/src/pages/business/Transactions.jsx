@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getBusinessByOwnerId, getBusinessTransactions } from '../../lib/mockStore';
+import { findMockBusinessForUser, getBusinessTransactions } from '../../lib/mockStore';
+import BackendDataPending from '../../components/BackendDataPending';
 
 const STATUS_STYLES = {
   PAID: 'text-green-700',
@@ -10,8 +11,15 @@ const STATUS_STYLES = {
 
 function Transactions() {
   const { user } = useAuth();
-  const business = useMemo(() => getBusinessByOwnerId(user.id), [user.id]);
-  const transactions = useMemo(() => getBusinessTransactions(business.id), [business.id]);
+  const business = useMemo(() => findMockBusinessForUser(user), [user]);
+  const transactions = useMemo(
+    () => (business ? getBusinessTransactions(business.id) : []),
+    [business],
+  );
+
+  if (!business) {
+    return <BackendDataPending title="Transactions" />;
+  }
 
   return (
     <div>

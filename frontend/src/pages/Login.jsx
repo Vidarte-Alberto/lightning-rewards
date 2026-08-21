@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { homeForRole, useAuth } from '../context/AuthContext';
 import FormField from '../components/FormField';
 
 function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (user) {
-    return <Navigate to={user.role === 'BUSINESS' ? '/business/dashboard' : '/customer/discover'} replace />;
+    return <Navigate to={homeForRole(user.role)} replace />;
   }
 
   const handleSubmit = async (event) => {
@@ -22,7 +23,7 @@ function Login() {
 
     try {
       const loggedInUser = await login({ email, password });
-      navigate(loggedInUser.role === 'BUSINESS' ? '/business/dashboard' : '/customer/discover');
+      navigate(location.state?.from || homeForRole(loggedInUser.role), { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -35,8 +36,8 @@ function Login() {
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <h1 className="text-2xl font-semibold text-neutral-900 text-center">Log in</h1>
 
-        <FormField id="email" label="Email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
-        <FormField id="password" label="Password" type="password" required value={password} onChange={(event) => setPassword(event.target.value)} />
+        <FormField id="email" label="Email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+        <FormField id="password" label="Password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} />
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
