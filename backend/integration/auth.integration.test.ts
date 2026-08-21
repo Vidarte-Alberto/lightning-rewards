@@ -32,7 +32,7 @@ test('registers a business owner with a business profile', async () => {
     password: 'password123',
     name: 'Phase 2 Cafe',
     category: 'Cafe',
-    nofferString: `noffer-${testId}`,
+    nofferString: `noffer1${testId}`,
     rewardDescription: 'Un cafe gratis',
   });
 
@@ -63,10 +63,36 @@ test('logs in a customer and lets them update their ndebit string', async () => 
   expect(loggedIn.user.role).toBe(Role.CUSTOMER);
 
   const updatedUser = await updateCustomerProfile(registered.user.id, {
-    ndebitString: `ndebit-${testId}`,
+    ndebitString: `ndebit1${testId}`,
   });
 
-  expect(updatedUser.ndebitString).toBe(`ndebit-${testId}`);
+  expect(updatedUser.ndebitString).toBe(`ndebit1${testId}`);
+});
+
+test('rejects wallet fields that are not CLINK pointers', async () => {
+  await expect(
+    register({
+      role: Role.BUSINESS,
+      email: `invalid-offer-${testId}@example.com`,
+      password: 'password123',
+      name: 'Invalid Offer Cafe',
+      category: 'Cafe',
+      nofferString: `npub1${testId}`,
+      rewardDescription: 'A reward',
+    }),
+  ).rejects.toMatchObject({
+    statusCode: 400,
+    message: 'nofferString must be a CLINK noffer starting with noffer1',
+  });
+
+  await expect(
+    updateCustomerProfile('customer-id-is-not-used', {
+      ndebitString: `noffer1${testId}`,
+    }),
+  ).rejects.toMatchObject({
+    statusCode: 400,
+    message: 'ndebitString must be a CLINK ndebit starting with ndebit1',
+  });
 });
 
 test('rejects customer-only routes for business users', () => {

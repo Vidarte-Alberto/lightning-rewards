@@ -117,12 +117,13 @@ const isTimeout = (error: unknown) =>
   (error instanceof Error && error.message.includes('failed to get response in time'));
 
 export class ClinkService {
-  private readonly privateKeyHex?: string;
+  private readonly privateKey: Uint8Array;
   private readonly timeoutSeconds: number;
   private readonly loadModule: ClinkModuleLoader;
 
   constructor(options: ClinkServiceOptions) {
-    this.privateKeyHex = options.privateKeyHex;
+    // Validate and retain one platform identity for every CLINK request.
+    this.privateKey = privateKeyFromHex(options.privateKeyHex);
     this.timeoutSeconds = options.timeoutSeconds;
     this.loadModule = options.loadModule ?? defaultModuleLoader;
   }
@@ -135,7 +136,7 @@ export class ClinkService {
     const sdkModule = await this.loadModule();
     const pointer = this.decodePointer(sdkModule, nofferString, 'noffer');
     const client = this.createClient(sdkModule, {
-      privateKey: privateKeyFromHex(this.privateKeyHex),
+      privateKey: this.privateKey,
       relays: [pointer.relay],
       toPubKey: pointer.pubkey,
       defaultTimeoutSeconds: this.timeoutSeconds,
@@ -171,7 +172,7 @@ export class ClinkService {
     const sdkModule = await this.loadModule();
     const pointer = this.decodePointer(sdkModule, ndebitString, 'ndebit');
     const client = this.createClient(sdkModule, {
-      privateKey: privateKeyFromHex(this.privateKeyHex),
+      privateKey: this.privateKey,
       relays: [pointer.relay],
       toPubKey: pointer.pubkey,
       defaultTimeoutSeconds: this.timeoutSeconds,

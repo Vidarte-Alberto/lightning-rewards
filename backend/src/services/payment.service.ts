@@ -15,7 +15,7 @@ export type PurchaseInput = {
   idempotencyKey: string;
 };
 
-export type PurchaseOutcome = 'paid' | 'failed' | 'unknown' | 'pending';
+export type PurchaseOutcome = 'paid' | 'denied' | 'failed' | 'unknown' | 'pending';
 
 export type PurchaseResult = {
   outcome: PurchaseOutcome;
@@ -184,7 +184,11 @@ export class PaymentService {
   private existingResult(transaction: Transaction, input: PurchaseInput): PurchaseResult {
     this.assertSamePurchase(transaction, input);
     return {
-      outcome: statusOutcome[transaction.status],
+      outcome:
+        transaction.status === TransactionStatus.FAILED &&
+        transaction.failureCode === 'CLINK_DEBIT_DENIED'
+          ? 'denied'
+          : statusOutcome[transaction.status],
       transaction,
       code: transaction.failureCode ?? undefined,
       message: transaction.failureMessage ?? undefined,
@@ -236,6 +240,7 @@ export class PaymentService {
             cause: error,
           });
     const unknown = debitWasRequested && clinkError.indeterminate;
+    const denied = clinkError.code === 'CLINK_DEBIT_DENIED';
     const updated = await this.prisma.transaction.update({
       where: { id: transactionId },
       data: {
@@ -246,7 +251,7 @@ export class PaymentService {
     });
 
     return {
-      outcome: unknown ? 'unknown' : 'failed',
+      outcome: unknown ? 'unknown' : denied ? 'denied' : 'failed',
       transaction: updated,
       code: clinkError.code,
       message: clinkError.publicMessage,

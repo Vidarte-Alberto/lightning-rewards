@@ -5,6 +5,11 @@ import config from '../config';
 import prisma from '../db/prisma';
 import { Role, type Business, type User } from '../generated/prisma/client';
 import { AppError } from '../middlewares';
+import {
+  clinkFormatMessage,
+  hasClinkPrefix,
+  type ClinkPointerType,
+} from './clink.validation';
 
 const PASSWORD_SALT_ROUNDS = 12;
 const TOKEN_EXPIRES_IN = '7d';
@@ -53,6 +58,20 @@ const readRequiredString = (value: unknown, field: string) => {
   }
 
   return value.trim();
+};
+
+const readRequiredClinkPointer = (
+  value: unknown,
+  field: string,
+  type: ClinkPointerType,
+) => {
+  const pointer = readRequiredString(value, field);
+
+  if (!hasClinkPrefix(pointer, type)) {
+    throw new AppError(400, clinkFormatMessage(field, type));
+  }
+
+  return pointer;
 };
 
 const readOptionalString = (value: unknown, field: string) => {
@@ -105,6 +124,25 @@ export const register = async (input: RegisterInput): Promise<RegisterResult> =>
     throw new AppError(400, 'password must be at least 8 characters');
   }
 
+  const businessInput =
+    role === Role.BUSINESS
+      ? {
+          name: readRequiredString(input.name, 'name'),
+          category: readRequiredString(input.category, 'category'),
+          nofferString: readRequiredClinkPointer(
+            input.nofferString,
+            'nofferString',
+            'noffer',
+          ),
+          rewardDescription: readRequiredString(
+            input.rewardDescription,
+            'rewardDescription',
+          ),
+          logoUrl: readOptionalString(input.logoUrl, 'logoUrl'),
+          description: readOptionalString(input.description, 'description'),
+        }
+      : undefined;
+
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
   if (existingUser) {
@@ -125,12 +163,9 @@ export const register = async (input: RegisterInput): Promise<RegisterResult> =>
     return { user: toPublicUser(user) };
   }
 
-  const name = readRequiredString(input.name, 'name');
-  const category = readRequiredString(input.category, 'category');
-  const nofferString = readRequiredString(input.nofferString, 'nofferString');
-  const rewardDescription = readRequiredString(input.rewardDescription, 'rewardDescription');
-  const logoUrl = readOptionalString(input.logoUrl, 'logoUrl');
-  const description = readOptionalString(input.description, 'description');
+  if (!businessInput) {
+    throw new AppError(400, 'business profile is required');
+  }
 
   const { user, business } = await prisma.$transaction(async (tx) => {
     const createdUser = await tx.user.create({
@@ -144,12 +179,12 @@ export const register = async (input: RegisterInput): Promise<RegisterResult> =>
     const createdBusiness = await tx.business.create({
       data: {
         ownerId: createdUser.id,
-        name,
-        category,
-        nofferString,
-        rewardDescription,
-        logoUrl,
-        description,
+        name: businessInput.name,
+        category: businessInput.category,
+        nofferString: businessInput.nofferString,
+        rewardDescription: businessInput.rewardDescription,
+        logoUrl: businessInput.logoUrl,
+        description: businessInput.description,
       },
       select: {
         id: true,
@@ -189,7 +224,11 @@ export const login = async (input: LoginInput) => {
 };
 
 export const updateCustomerProfile = async (userId: string, input: UpdateCustomerInput) => {
-  const ndebitString = readRequiredString(input.ndebitString, 'ndebitString');
+  const ndebitString = readRequiredClinkPointer(
+    input.ndebitString,
+    'ndebitString',
+    'ndebit',
+  );
 
   const user = await prisma.user.update({
     where: { id: userId },

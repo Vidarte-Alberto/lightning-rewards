@@ -128,6 +128,42 @@ test('accepts an internal settlement without a preimage', async () => {
   ).resolves.toEqual({ preimage: undefined, internalSettlement: true });
 });
 
+test('maps GFY code 1 to an explicit customer denial', async () => {
+  const { module } = createFakeSdk({
+    decoded: {
+      type: 'ndebit',
+      data: { pubkey: 'wallet-pubkey', relay: 'wss://relay.example.com' },
+    },
+    debitResponse: { res: 'GFY', code: 1, error: 'Request Denied' },
+  });
+
+  await expect(
+    createService(module).requestDebitPayment('ndebit1test', 'lnbc-test', 100),
+  ).rejects.toMatchObject({
+    code: 'CLINK_DEBIT_DENIED',
+    publicMessage: 'The payment was not approved in your wallet.',
+    retryable: false,
+    indeterminate: false,
+  });
+});
+
+test('rejects a missing platform key when the service starts', () => {
+  const { module } = createFakeSdk();
+
+  expect(
+    () =>
+      new ClinkService({
+        privateKeyHex: undefined,
+        timeoutSeconds: 15,
+        loadModule: async () => module,
+      }),
+  ).toThrowError(
+    expect.objectContaining({
+      code: 'CLINK_CONFIGURATION',
+    }),
+  );
+});
+
 test('marks debit timeouts as indeterminate and never retryable', async () => {
   const { module, calls } = createFakeSdk({
     decoded: {
