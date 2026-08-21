@@ -58,7 +58,7 @@ function Dashboard() {
         <p className="mt-8 text-neutral-500">No customers yet — once someone buys something, they&apos;ll show up here.</p>
       ) : (
         <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-          <table className="w-full text-sm">
+          <table className="min-w-[36rem] w-full text-sm">
             <thead>
               <tr className="border-b border-neutral-200 text-left text-neutral-500">
                 <th className="px-4 py-3 font-medium">Customer</th>

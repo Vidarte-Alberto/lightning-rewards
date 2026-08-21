@@ -127,7 +127,7 @@ function Purchase() {
             {result.loyalty.card.currentStamps}/{result.loyalty.stampsRequired} stamps collected
           </p>
         )}
-        <div className="mt-6 flex justify-center gap-4">
+        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
           <Link to="/customer/cards" className="rounded-lg bg-neutral-900 px-6 py-3 font-medium text-white transition-colors hover:bg-neutral-700">
             View my cards
           </Link>

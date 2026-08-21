@@ -32,7 +32,7 @@ function ApprovalSetup({ setup, error }) {
           <label htmlFor="platformNpub" className="mt-4 block text-sm font-medium text-neutral-700">
             Lightning Rewards app identity
           </label>
-          <div className="mt-1 flex gap-2">
+          <div className="mt-1 flex flex-col gap-2 sm:flex-row">
             <input
               id="platformNpub"
               readOnly
