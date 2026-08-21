@@ -1,18 +1,52 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { findMockBusinessForUser, getBusinessCustomers } from '../../lib/mockStore';
-import BackendDataPending from '../../components/BackendDataPending';
+import {
+  getOwnedBusinessCustomersRequest,
+  getOwnedBusinessRequest,
+} from '../../lib/api';
 
 function Dashboard() {
-  const { user } = useAuth();
-  const business = useMemo(() => findMockBusinessForUser(user), [user]);
-  const customers = useMemo(
-    () => (business ? getBusinessCustomers(business.id) : []),
-    [business],
-  );
+  const { token } = useAuth();
+  const [business, setBusiness] = useState(null);
+  const [customers, setCustomers] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (!business) {
-    return <BackendDataPending title="Business dashboard" />;
+  useEffect(() => {
+    let active = true;
+
+    Promise.all([
+      getOwnedBusinessRequest(token),
+      getOwnedBusinessCustomersRequest(token),
+    ])
+      .then(([businessResult, customersResult]) => {
+        if (!active) return;
+        setBusiness(businessResult.business);
+        setCustomers(customersResult.customers);
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError.message);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [token]);
+
+  if (isLoading) {
+    return <p className="text-neutral-500">Loading business dashboard…</p>;
+  }
+
+  if (error || !business) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold text-neutral-900">Business dashboard</h1>
+        <p className="mt-4 text-red-600">{error || 'Business profile not found.'}</p>
+      </div>
+    );
   }
 
   return (

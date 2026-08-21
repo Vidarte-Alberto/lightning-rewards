@@ -9,8 +9,12 @@ import {
   getBusinessCustomers,
   getBusinessDetail,
   getCustomerCards,
+  getOwnedBusiness,
+  getOwnedBusinessCustomers,
+  getOwnedBusinessTransactions,
   listBusinesses,
   PaymentService,
+  updateOwnedBusiness,
 } from '../services';
 import { login, register, updateCustomerProfile } from '../auth';
 import { createPaymentRouter } from './payment.routes';
@@ -53,6 +57,46 @@ router.use(
   requireAuth,
   requireRole(Role.CUSTOMER),
   createPaymentRouter(paymentService),
+);
+
+router.get(
+  '/businesses/me',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const business = await getOwnedBusiness(req.user.id);
+    res.json({ business });
+  }),
+);
+
+router.patch(
+  '/businesses/me',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const business = await updateOwnedBusiness(req.user.id, req.body);
+    res.json({ business });
+  }),
+);
+
+router.get(
+  '/businesses/me/customers',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const customers = await getOwnedBusinessCustomers(req.user.id);
+    res.json({ customers });
+  }),
+);
+
+router.get(
+  '/businesses/me/transactions',
+  requireAuth,
+  requireRole(Role.BUSINESS),
+  asyncHandler(async (req, res) => {
+    const transactions = await getOwnedBusinessTransactions(req.user.id);
+    res.json({ transactions });
+  }),
 );
 
 router.get(

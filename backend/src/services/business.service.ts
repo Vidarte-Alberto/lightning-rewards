@@ -7,6 +7,12 @@ type BusinessFilters = {
   customerId?: unknown;
 };
 
+type UpdateOwnedBusinessInput = {
+  stampsRequired?: unknown;
+  rewardDescription?: unknown;
+  nofferString?: unknown;
+};
+
 const readOptionalString = (value: unknown, field: string) => {
   if (value === undefined || value === null) {
     return undefined;
@@ -30,6 +36,35 @@ const businessSelect = {
   rewardDescription: true,
   isActive: true,
 } as const;
+
+const ownedBusinessSelect = {
+  ...businessSelect,
+  ownerId: true,
+  nofferString: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+const readRequiredString = (value: unknown, field: string) => {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new AppError(400, `${field} is required`);
+  }
+
+  return value.trim();
+};
+
+const getOwnedBusinessOrThrow = async (ownerId: string) => {
+  const business = await prisma.business.findUnique({
+    where: { ownerId },
+    select: ownedBusinessSelect,
+  });
+
+  if (!business) {
+    throw new AppError(404, 'business profile not found');
+  }
+
+  return business;
+};
 
 const toBusinessWithProgress = <
   T extends object & {
@@ -138,4 +173,89 @@ export const getBusinessDetail = async (businessId: unknown, filters: BusinessFi
   }
 
   return toBusinessWithProgress(business, Boolean(customerId));
+};
+
+export const getOwnedBusiness = (ownerId: string) => getOwnedBusinessOrThrow(ownerId);
+
+export const updateOwnedBusiness = async (
+  ownerId: string,
+  input: UpdateOwnedBusinessInput,
+) => {
+  const data: {
+    stampsRequired?: number;
+    rewardDescription?: string;
+    nofferString?: string;
+  } = {};
+
+  if (input.stampsRequired !== undefined) {
+    if (!Number.isSafeInteger(input.stampsRequired) || Number(input.stampsRequired) <= 0) {
+      throw new AppError(400, 'stampsRequired must be a positive integer');
+    }
+    data.stampsRequired = Number(input.stampsRequired);
+  }
+
+  if (input.rewardDescription !== undefined) {
+    data.rewardDescription = readRequiredString(
+      input.rewardDescription,
+      'rewardDescription',
+    );
+  }
+
+  if (input.nofferString !== undefined) {
+    data.nofferString = readRequiredString(input.nofferString, 'nofferString');
+  }
+
+  if (Object.keys(data).length === 0) {
+    throw new AppError(400, 'at least one program setting is required');
+  }
+
+  await getOwnedBusinessOrThrow(ownerId);
+
+  return prisma.business.update({
+    where: { ownerId },
+    data,
+    select: ownedBusinessSelect,
+  });
+};
+
+export const getOwnedBusinessCustomers = async (ownerId: string) => {
+  const business = await getOwnedBusinessOrThrow(ownerId);
+
+  return prisma.loyaltyCard.findMany({
+    where: { businessId: business.id },
+    orderBy: { updatedAt: 'desc' },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          email: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+};
+
+export const getOwnedBusinessTransactions = async (ownerId: string) => {
+  const business = await getOwnedBusinessOrThrow(ownerId);
+
+  return prisma.transaction.findMany({
+    where: { businessId: business.id },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      amountSats: true,
+      status: true,
+      failureCode: true,
+      failureMessage: true,
+      paidAt: true,
+      createdAt: true,
+      customer: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+    },
+  });
 };
