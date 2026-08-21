@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import type { Mocked } from 'vitest';
 
 import { Role, TransactionStatus } from '../src/generated/prisma/client';
 import prisma from '../src/db/prisma';
@@ -15,9 +16,9 @@ let businessId: string;
 let customerId: string;
 let ownerId: string;
 
-const clink: jest.Mocked<ClinkPaymentPort> = {
-  requestInvoiceFromOffer: jest.fn(),
-  requestDebitPayment: jest.fn(),
+const clink: Mocked<ClinkPaymentPort> = {
+  requestInvoiceFromOffer: vi.fn(),
+  requestDebitPayment: vi.fn(),
 };
 
 const paymentService = new PaymentService(prisma, clink);
