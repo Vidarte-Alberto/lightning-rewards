@@ -99,9 +99,15 @@ test('loads and updates loyalty program settings', async () => {
   fetch
     .mockResolvedValueOnce(jsonResponse({ business }))
     .mockResolvedValueOnce(
+      jsonResponse({ offerStatus: { status: 'available', checkedAt: '2026-08-21' } }),
+    )
+    .mockResolvedValueOnce(
       jsonResponse({
         business: { ...business, stampsRequired: 7, rewardDescription: 'A free brunch' },
       }),
+    )
+    .mockResolvedValueOnce(
+      jsonResponse({ offerStatus: { status: 'available', checkedAt: '2026-08-21' } }),
     );
 
   renderBusinessRoute('/business/settings');
@@ -115,7 +121,7 @@ test('loads and updates loyalty program settings', async () => {
 
   expect(await screen.findByText('Program updated.')).toBeInTheDocument();
   expect(fetch).toHaveBeenNthCalledWith(
-    2,
+    3,
     'http://localhost:3000/businesses/me',
     expect.objectContaining({
       method: 'PATCH',
@@ -126,6 +132,48 @@ test('loads and updates loyalty program settings', async () => {
       }),
     }),
   );
+  expect(screen.getByText('Offer available')).toBeInTheDocument();
+});
+
+test('shows when the configured Lightning.Pub offer is unavailable', async () => {
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(
+      jsonResponse({
+        offerStatus: {
+          status: 'unavailable',
+          code: 'CLINK_OFFER_TIMEOUT',
+          message: 'Lightning.Pub did not respond to the test invoice request.',
+        },
+      }),
+    );
+
+  renderBusinessRoute('/business/settings');
+
+  expect(await screen.findByText('Offer unavailable')).toBeInTheDocument();
+  expect(
+    screen.getByText('Lightning.Pub did not respond to the test invoice request.'),
+  ).toBeInTheDocument();
+});
+
+test('rejects a non-CLINK offer before saving settings', async () => {
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(
+      jsonResponse({ offerStatus: { status: 'available', checkedAt: '2026-08-21' } }),
+    );
+
+  renderBusinessRoute('/business/settings');
+
+  const offerInput = await screen.findByLabelText('Lightning.Pub offer');
+  await screen.findByText('Offer available');
+  fireEvent.change(offerInput, { target: { value: 'npub1wrong' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+  expect(
+    await screen.findByText('Paste a CLINK offer that starts with noffer1.'),
+  ).toBeInTheDocument();
+  expect(fetch).toHaveBeenCalledTimes(2);
 });
 
 test('loads the authenticated business transaction history', async () => {

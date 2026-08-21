@@ -78,3 +78,6 @@ export const getOwnedBusinessCustomersRequest = (token) =>
 
 export const getOwnedBusinessTransactionsRequest = (token) =>
   apiRequest('/businesses/me/transactions', { token });
+
+export const checkOwnedBusinessOfferRequest = (token) =>
+  apiRequest('/businesses/me/offer-test', { method: 'POST', token });
