@@ -9,6 +9,9 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }]
   },
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
   coveragePathIgnorePatterns: [
     "/node_modules/"
   ]
