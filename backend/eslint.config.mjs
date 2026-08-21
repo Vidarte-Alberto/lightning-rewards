@@ -1,6 +1,7 @@
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
+import pluginVitest from "@vitest/eslint-plugin";
 
 export default tseslint.config(
   {
@@ -18,8 +19,12 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.jest
+        ...pluginVitest.environments.env.globals
       }
     }
+  },
+  {
+    files: ["unit/**", "integration/**"],
+    ...pluginVitest.configs.recommended,
   }
 );
