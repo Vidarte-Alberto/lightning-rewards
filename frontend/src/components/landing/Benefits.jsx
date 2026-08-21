@@ -1,0 +1,43 @@
+const SECTIONS = [
+  {
+    title: 'For businesses',
+    items: [
+      'Build repeat visits without any extra hardware or app for customers to install',
+      'Get paid instantly over Lightning — no card fees, no chargebacks',
+      'See every customer’s stamp progress from one dashboard',
+    ],
+  },
+  {
+    title: 'For customers',
+    items: [
+      'No physical card to carry or lose',
+      'Track your progress toward the reward at any business you visit',
+      'Pay the way you already do with Lightning — the stamp just happens',
+    ],
+  },
+];
+
+function Benefits() {
+  return (
+    <section id="benefits" className="max-w-5xl mx-auto px-6 py-16">
+      <h2 className="text-3xl font-bold text-neutral-900 text-center">Benefits</h2>
+      <div className="mt-10 grid gap-12 sm:grid-cols-2">
+        {SECTIONS.map((section) => (
+          <div key={section.title}>
+            <h3 className="font-semibold text-neutral-900">{section.title}</h3>
+            <ul className="mt-4 space-y-3">
+              {section.items.map((item) => (
+                <li key={item} className="flex gap-3 text-neutral-600">
+                  <span className="text-neutral-400" aria-hidden="true">—</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export default Benefits;
