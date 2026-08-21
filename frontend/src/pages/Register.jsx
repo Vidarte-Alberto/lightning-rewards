@@ -43,18 +43,18 @@ function Register() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-10 bg-neutral-950 bg-[radial-gradient(circle_at_50%_0%,rgba(245,165,36,0.08),transparent_28rem)]">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-10 bg-ink bg-[radial-gradient(circle_at_50%_0%,rgba(245,165,36,0.08),transparent_28rem)]">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-semibold text-white text-center">Sign up</h1>
+        <h1 className="text-2xl font-semibold text-neutral-50 text-center">Sign up</h1>
 
-        <div className="flex rounded-lg border border-neutral-700 p-1">
+        <div className="flex gap-1 rounded-full border border-white/8 bg-black/24 p-1">
           {VALID_ROLES.map((option) => (
             <button
               key={option}
               type="button"
               onClick={() => setRole(option.toUpperCase())}
-              className={`flex-1 rounded-md py-2 text-sm font-medium capitalize transition-colors ${
-                role === option.toUpperCase() ? 'bg-amber-500 text-neutral-950' : 'text-neutral-400'
+              className={`min-h-8 flex-1 rounded-full text-xs font-extrabold capitalize transition-colors ${
+                role === option.toUpperCase() ? 'bg-accent text-neutral-900' : 'text-neutral-500'
               }`}
             >
               {option}
@@ -96,18 +96,18 @@ function Register() {
           </>
         )}
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-6 py-3 rounded-lg bg-amber-500 text-neutral-950 font-semibold hover:bg-amber-400 transition-colors disabled:opacity-50"
+          className="inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {isSubmitting ? 'Signing up…' : 'Sign up'}
         </button>
 
         <p className="text-sm text-neutral-400 text-center">
-          Already have an account? <Link to="/login" className="text-amber-400 underline underline-offset-4 hover:text-amber-300">Log in</Link>
+          Already have an account? <Link to="/login" className="text-accent-soft underline underline-offset-4 hover:brightness-110">Log in</Link>
         </p>
         <Link to="/" className="block text-sm text-neutral-500 text-center underline underline-offset-4 hover:text-neutral-300">
           Back to home

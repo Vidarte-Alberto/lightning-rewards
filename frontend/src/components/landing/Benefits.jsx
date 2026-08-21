@@ -22,15 +22,16 @@ const SECTIONS = [
 function Benefits() {
   return (
     <section id="benefits" className="max-w-5xl mx-auto px-6 py-16">
-      <h2 className="text-3xl font-bold text-white text-center">Benefits</h2>
+      <p className="text-center text-xs font-extrabold tracking-[0.22em] text-accent uppercase">Why it works</p>
+      <h2 className="mt-4 text-3xl font-bold text-neutral-50 text-center">Benefits</h2>
       <div className="mt-10 grid gap-12 sm:grid-cols-2">
         {SECTIONS.map((section) => (
           <div key={section.title}>
-            <h3 className="font-semibold text-white">{section.title}</h3>
+            <h3 className="font-semibold text-neutral-50">{section.title}</h3>
             <ul className="mt-4 space-y-3">
               {section.items.map((item) => (
                 <li key={item} className="flex gap-3 text-neutral-400">
-                  <span className="text-amber-500" aria-hidden="true">—</span>
+                  <span className="text-accent" aria-hidden="true">—</span>
                   <span>{item}</span>
                 </li>
               ))}

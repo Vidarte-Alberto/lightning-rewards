@@ -10,15 +10,15 @@ import FormField from '../../components/FormField';
 const OFFER_STATUS = {
   checking: {
     label: 'Checking offer…',
-    className: 'border-neutral-700 bg-neutral-900 text-neutral-400',
+    className: 'border-white/16 bg-white/4 text-neutral-400',
   },
   available: {
     label: 'Offer available',
-    className: 'border-green-500/30 bg-green-500/10 text-green-400',
+    className: 'border-success/25 bg-success/8 text-success',
   },
   unavailable: {
     label: 'Offer unavailable',
-    className: 'border-red-500/30 bg-red-500/10 text-red-400',
+    className: 'border-danger/25 bg-danger/8 text-danger',
   },
 };
 
@@ -27,9 +27,11 @@ function OfferStatus({ status, message }) {
   const presentation = OFFER_STATUS[status];
 
   return (
-    <div className={`rounded-lg border px-3 py-2 text-sm ${presentation.className}`}>
-      <span className="font-medium">{presentation.label}</span>
-      {message && <span className="block mt-1">{message}</span>}
+    <div>
+      <span className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-bold ${presentation.className}`}>
+        {presentation.label}
+      </span>
+      {message && <p className="mt-1 text-sm text-neutral-400">{message}</p>}
     </div>
   );
 }
@@ -122,7 +124,7 @@ function Settings() {
 
   return (
     <div className="max-w-md">
-      <h1 className="text-2xl font-bold text-white">Settings</h1>
+      <h1 className="text-2xl font-bold text-neutral-50">Settings</h1>
 
       {isLoading ? (
         <p className="mt-6 text-neutral-500">Loading settings…</p>
@@ -163,7 +165,7 @@ function Settings() {
         <OfferStatus status={offerStatus} message={offerMessage} />
 
         {nofferString.trim() !== savedNofferString && (
-          <p className="text-sm text-amber-400">
+          <p className="text-sm text-accent-soft">
             Save your changes before checking the updated offer.
           </p>
         )}
@@ -176,19 +178,19 @@ function Settings() {
             isSubmitting ||
             nofferString.trim() !== savedNofferString
           }
-          className="px-4 py-2 rounded-lg border border-neutral-700 text-sm font-medium text-white hover:border-amber-500 hover:text-amber-400 transition-colors disabled:opacity-50"
+          className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/16 bg-white/4 px-6 text-sm font-extrabold text-neutral-100 transition-transform hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent-soft disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {offerStatus === 'checking' ? 'Checking…' : 'Check offer'}
         </button>
 
         {status && (
-          <p className={`text-sm ${status.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>{status.message}</p>
+          <p className={`text-sm ${status.type === 'error' ? 'text-danger' : 'text-success'}`}>{status.message}</p>
         )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-3 rounded-lg bg-amber-500 text-neutral-950 font-semibold hover:bg-amber-400 transition-colors disabled:opacity-50"
+          className="inline-flex min-h-13 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-neutral-900 transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {isSubmitting ? 'Saving…' : 'Save changes'}
         </button>
