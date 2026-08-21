@@ -104,18 +104,20 @@ test('loads and filters businesses with authenticated customer progress', async 
 });
 
 test('loads loyalty cards from the backend', async () => {
-  fetch.mockResolvedValueOnce(
-    jsonResponse({
-      cards: [
-        {
-          id: 'card-id',
-          currentStamps: 3,
-          totalStampsEver: 8,
-          business,
-        },
-      ],
-    }),
-  );
+  fetch
+    .mockResolvedValueOnce(
+      jsonResponse({
+        cards: [
+          {
+            id: 'card-id',
+            currentStamps: 3,
+            totalStampsEver: 8,
+            business,
+          },
+        ],
+      }),
+    )
+    .mockResolvedValueOnce(jsonResponse({ rewards: [] }));
 
   renderCustomerRoute('/customer/cards');
 
@@ -125,6 +127,48 @@ test('loads loyalty cards from the backend', async () => {
   expect(fetch).toHaveBeenCalledWith(
     'http://localhost:3000/customers/me/cards',
     expect.any(Object),
+  );
+});
+
+test('keeps earned rewards visible and lets the customer redeem them explicitly', async () => {
+  const availableReward = {
+    id: 'reward-id',
+    description: 'A free coffee',
+    status: 'AVAILABLE',
+    earnedAt: '2026-08-21T12:00:00.000Z',
+    redeemedAt: null,
+    transaction: { business },
+  };
+  fetch
+    .mockResolvedValueOnce(jsonResponse({
+      cards: [{
+        id: 'card-id',
+        currentStamps: 0,
+        totalStampsEver: 5,
+        business,
+      }],
+    }))
+    .mockResolvedValueOnce(jsonResponse({ rewards: [availableReward] }))
+    .mockResolvedValueOnce(jsonResponse({
+      reward: {
+        ...availableReward,
+        status: 'REDEEMED',
+        redeemedAt: '2026-08-21T13:00:00.000Z',
+      },
+    }));
+
+  renderCustomerRoute('/customer/cards');
+
+  expect(await screen.findByRole('heading', { name: 'A free coffee' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Redeem reward' }));
+  expect(screen.getByText(/Show this screen to the business/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Redeem now' }));
+
+  expect(await screen.findByText(/Redeemed/)).toBeInTheDocument();
+  expect(fetch).toHaveBeenNthCalledWith(
+    3,
+    'http://localhost:3000/customers/me/rewards/reward-id/redeem',
+    expect.objectContaining({ method: 'POST' }),
   );
 });
 

@@ -1,8 +1,14 @@
 import { randomUUID } from 'node:crypto';
 
-import { Role, TransactionStatus } from '../src/generated/prisma/client';
+import { RewardStatus, Role, TransactionStatus } from '../src/generated/prisma/client';
 import prisma from '../src/db/prisma';
-import { addStamp, getBusinessCustomers, getCustomerCards } from '../src/services';
+import {
+  addStamp,
+  getBusinessCustomers,
+  getCustomerCards,
+  getCustomerRewards,
+  redeemCustomerReward,
+} from '../src/services';
 
 const testId = randomUUID();
 
@@ -10,6 +16,7 @@ let businessId: string;
 let customerId: string;
 let ownerId: string;
 let otherOwnerId: string;
+let otherCustomerId: string;
 
 beforeAll(async () => {
   const customer = await prisma.user.create({
@@ -36,6 +43,14 @@ beforeAll(async () => {
     },
   });
 
+  const otherCustomer = await prisma.user.create({
+    data: {
+      email: `loyalty-other-customer-${testId}@example.com`,
+      passwordHash: 'integration-test-only',
+      role: Role.CUSTOMER,
+    },
+  });
+
   const business = await prisma.business.create({
     data: {
       ownerId: owner.id,
@@ -50,6 +65,7 @@ beforeAll(async () => {
   customerId = customer.id;
   ownerId = owner.id;
   otherOwnerId = otherOwner.id;
+  otherCustomerId = otherCustomer.id;
   businessId = business.id;
 });
 
@@ -69,7 +85,9 @@ afterAll(async () => {
   await prisma.transaction.deleteMany({ where: { customerId } });
   await prisma.loyaltyCard.deleteMany({ where: { customerId } });
   await prisma.business.delete({ where: { id: businessId } });
-  await prisma.user.deleteMany({ where: { id: { in: [customerId, ownerId, otherOwnerId] } } });
+  await prisma.user.deleteMany({
+    where: { id: { in: [customerId, ownerId, otherOwnerId, otherCustomerId] } },
+  });
   await prisma.$disconnect();
 });
 
@@ -140,6 +158,26 @@ test('returns customer cards with business details', async () => {
     name: 'Loyalty Test Business',
     stampsRequired: 2,
   });
+});
+
+test('lists and idempotently redeems rewards only for their customer', async () => {
+  const rewards = await getCustomerRewards(customerId);
+  expect(rewards).toHaveLength(1);
+  expect(rewards[0]).toMatchObject({
+    description: 'Reward from integration test',
+    status: RewardStatus.AVAILABLE,
+    transaction: { business: { id: businessId, name: 'Loyalty Test Business' } },
+  });
+
+  await expect(
+    redeemCustomerReward(otherCustomerId, rewards[0].id),
+  ).rejects.toMatchObject({ statusCode: 404 });
+
+  const redeemed = await redeemCustomerReward(customerId, rewards[0].id);
+  const replay = await redeemCustomerReward(customerId, rewards[0].id);
+  expect(redeemed.status).toBe(RewardStatus.REDEEMED);
+  expect(redeemed.redeemedAt).toBeInstanceOf(Date);
+  expect(replay.redeemedAt).toEqual(redeemed.redeemedAt);
 });
 
 test('returns business customers only to the business owner', async () => {
