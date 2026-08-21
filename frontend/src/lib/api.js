@@ -88,6 +88,9 @@ export const getCustomerBusinessesRequest = (token) =>
 export const getCustomerCardsRequest = (token) =>
   apiRequest('/customers/me/cards', { token });
 
+export const getCustomerClinkSetupRequest = (token) =>
+  apiRequest('/customers/me/clink-setup', { token });
+
 export const getBusinessRequest = (businessId) =>
   apiRequest(`/businesses/${encodeURIComponent(businessId)}`);
 

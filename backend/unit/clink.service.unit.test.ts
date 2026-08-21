@@ -52,6 +52,10 @@ const createFakeSdk = (options: FakeOptions = {}) => {
       calls.debitRequest.push(args);
       return { bolt11: args[0], amount_sats: args[1], pointer: args[2], k1: args[3] };
     },
+    getPublicKey: () => 'aa'.repeat(32),
+    nip19: {
+      npubEncode: (publicKeyHex: string) => `npub1${publicKeyHex}`,
+    },
   } as unknown as ClinkSdkModule;
 
   return { module, calls };
@@ -63,6 +67,15 @@ const createService = (module: ClinkSdkModule) =>
     timeoutSeconds: 15,
     loadModule: async () => module,
   });
+
+test('exposes the stable platform identity for wallet approval setup', async () => {
+  const { module } = createFakeSdk();
+
+  await expect(createService(module).getPlatformIdentity()).resolves.toEqual({
+    publicKeyHex: 'aa'.repeat(32),
+    npub: `npub1${'aa'.repeat(32)}`,
+  });
+});
 
 test('requests an invoice using the decoded noffer', async () => {
   const { module, calls } = createFakeSdk();

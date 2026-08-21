@@ -28,6 +28,17 @@ const business = {
   isActive: true,
 };
 
+const clinkSetup = {
+  identity: {
+    publicKeyHex: 'ab'.repeat(32),
+    npub: 'npub1lightningrewards',
+  },
+  recommendedBudget: {
+    amountSats: 20_000,
+    frequency: 'monthly',
+  },
+};
+
 const renderCustomerRoute = (route, ndebitString = 'ndebit1test') => {
   window.localStorage.setItem(
     SESSION_KEY,
@@ -118,25 +129,27 @@ test('loads loyalty cards from the backend', async () => {
 });
 
 test('connects a customer ndebit through the backend', async () => {
-  fetch.mockResolvedValueOnce(
-    jsonResponse({
-      user: {
-        id: 'customer-id',
-        email: 'customer@example.com',
-        role: 'CUSTOMER',
-        ndebitString: 'ndebit1connected',
-      },
-    }),
-  );
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ clinkSetup }))
+    .mockResolvedValueOnce(
+      jsonResponse({
+        user: {
+          id: 'customer-id',
+          email: 'customer@example.com',
+          role: 'CUSTOMER',
+          ndebitString: 'ndebit1connected',
+        },
+      }),
+    );
 
   renderCustomerRoute('/customer/wallet', null);
 
-  fireEvent.change(screen.getByLabelText('Ndebit string'), {
+  fireEvent.change(screen.getByLabelText('ShockWallet ndebit'), {
     target: { value: '  ndebit1connected  ' },
   });
   fireEvent.click(screen.getByRole('button', { name: 'Connect wallet' }));
 
-  expect(await screen.findByText('Wallet connected.')).toBeInTheDocument();
+  expect(await screen.findByText(/Wallet connected/)).toBeInTheDocument();
   expect(fetch).toHaveBeenCalledWith(
     'http://localhost:3000/customers/me',
     expect.objectContaining({
@@ -144,6 +157,37 @@ test('connects a customer ndebit through the backend', async () => {
       body: JSON.stringify({ ndebitString: 'ndebit1connected' }),
     }),
   );
+  expect(screen.getByRole('heading', { name: 'Finish setup in ShockWallet' })).toBeInTheDocument();
+});
+
+test('shows the stable app identity and approval budget guidance', async () => {
+  fetch.mockResolvedValueOnce(jsonResponse({ clinkSetup }));
+
+  renderCustomerRoute('/customer/wallet');
+
+  expect(
+    await screen.findByRole('heading', { name: 'Finish setup in ShockWallet' }),
+  ).toBeInTheDocument();
+  expect(screen.getByDisplayValue('npub1lightningrewards')).toBeInTheDocument();
+  expect(screen.getByText('Recommended budget: 20,000 sats/month')).toBeInTheDocument();
+  expect(fetch).toHaveBeenCalledWith(
+    'http://localhost:3000/customers/me/clink-setup',
+    expect.any(Object),
+  );
+});
+
+test('rejects a non-ndebit value before updating the customer wallet', async () => {
+  fetch.mockResolvedValueOnce(jsonResponse({ clinkSetup }));
+
+  renderCustomerRoute('/customer/wallet', null);
+
+  fireEvent.change(screen.getByLabelText('ShockWallet ndebit'), {
+    target: { value: 'noffer1wrongpointer' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Connect wallet' }));
+
+  expect(await screen.findByText(/it should start with "ndebit1"/)).toBeInTheDocument();
+  expect(fetch).toHaveBeenCalledTimes(1);
 });
 
 test('completes a real purchase and shows the awarded stamp', async () => {
@@ -187,6 +231,21 @@ test('completes a real purchase and shows the awarded stamp', async () => {
   });
 });
 
+test('tells the customer to open ShockWallet while approval is pending', async () => {
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockImplementationOnce(() => new Promise(() => undefined));
+
+  renderCustomerRoute('/customer/purchase/business-id');
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Pay with Lightning' }));
+
+  expect(
+    await screen.findByRole('heading', { name: 'Waiting for wallet approval…' }),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Open ShockWallet and approve/)).toBeInTheDocument();
+});
+
 test('shows a reward when the confirmed payment completes the loyalty card', async () => {
   fetch
     .mockResolvedValueOnce(jsonResponse({ business }))
@@ -208,6 +267,33 @@ test('shows a reward when the confirmed payment completes the loyalty card', asy
   fireEvent.click(await screen.findByRole('button', { name: 'Pay with Lightning' }));
 
   expect(await screen.findByText('🎉 Reward unlocked: A free coffee')).toBeInTheDocument();
+});
+
+test('distinguishes a declined wallet approval from a technical failure', async () => {
+  fetch
+    .mockResolvedValueOnce(jsonResponse({ business }))
+    .mockResolvedValueOnce(
+      jsonResponse(
+        {
+          outcome: 'denied',
+          error: {
+            code: 'CLINK_DEBIT_DENIED',
+            message: 'The payment was not approved in your wallet.',
+          },
+        },
+        422,
+      ),
+    );
+
+  renderCustomerRoute('/customer/purchase/business-id');
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Pay with Lightning' }));
+
+  expect(
+    await screen.findByRole('heading', { name: 'Payment approval declined' }),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Open ShockWallet and approve the next request/)).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Try payment again' })).toBeInTheDocument();
 });
 
 test('requires a connected wallet before starting a purchase', async () => {

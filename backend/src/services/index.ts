@@ -5,3 +5,4 @@ export * from './payment.service';
 export * from './business.service';
 export * from './business-offer.service';
 export * from './loyalty.service';
+export * from './customer-clink.service';
