@@ -11,6 +11,6 @@ test('renders the landing page at /', () => {
   );
 
   expect(
-    screen.getByRole('heading', { level: 1, name: /loyalty stamps/i }),
+    screen.getByRole('heading', { level: 1, name: /reason to return/i }),
   ).toBeInTheDocument();
 });

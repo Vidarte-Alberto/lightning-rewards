@@ -5,6 +5,7 @@ const SECTIONS = [
       'Build repeat visits without any extra hardware or app for customers to install',
       'Get paid instantly over Lightning — no card fees, no chargebacks',
       'See every customer’s stamp progress from one dashboard',
+      'Your noffer can receive payment requests — it can never spend your funds',
     ],
   },
   {
@@ -13,6 +14,7 @@ const SECTIONS = [
       'No physical card to carry or lose',
       'Track your progress toward the reward at any business you visit',
       'Pay the way you already do with Lightning — the stamp just happens',
+      'You control permission and budget — the app never sees your wallet seed',
     ],
   },
 ];

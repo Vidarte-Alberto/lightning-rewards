@@ -4,11 +4,11 @@ function Hero() {
   return (
     <section className="max-w-5xl mx-auto px-6 py-20 text-center">
       <h1 className="text-4xl sm:text-5xl font-bold text-neutral-900 leading-tight">
-        Loyalty stamps, earned automatically with Lightning payments
+        Every payment becomes a reason to return.
       </h1>
       <p className="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">
-        Every time a customer pays with Bitcoin Lightning at your business, they earn a
-        stamp. No extra app, no physical card, no manual button.
+        Lightning Rewards turns confirmed Bitcoin payments into automatic loyalty
+        stamps — no cards, no QR punch systems, no manual steps at checkout.
       </p>
       <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
         <Link

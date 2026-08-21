@@ -1,19 +1,19 @@
 const STEPS = [
   {
-    title: 'Pay with Lightning',
-    description: 'Customer pays at checkout using their Lightning wallet — no cash, no card.',
+    title: 'Discover',
+    description: 'Browse active local businesses and their rewards.',
   },
   {
-    title: 'Stamp added automatically',
-    description: 'Once the payment is confirmed, a stamp is added to their loyalty card. No manual step.',
+    title: 'Connect',
+    description: 'Paste a ShockWallet ndebit once — no seed phrase, no unrestricted access.',
   },
   {
-    title: 'Collect 5 stamps',
-    description: 'Every confirmed purchase counts toward the reward.',
+    title: 'Pay',
+    description: 'Approve manually or use a safe monthly budget for instant checkout.',
   },
   {
-    title: 'Unlock the reward',
-    description: 'At 5 stamps, the reward unlocks and the count resets for the next round.',
+    title: 'Earn',
+    description: 'See the stamp — and the reward, once unlocked — immediately.',
   },
 ];
 
