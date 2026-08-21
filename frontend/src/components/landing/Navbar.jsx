@@ -8,6 +8,7 @@ function Navbar() {
         <div className="hidden sm:flex items-center gap-6 text-sm text-neutral-600">
           <a href="#how-it-works" className="hover:text-neutral-900">How it works</a>
           <a href="#benefits" className="hover:text-neutral-900">Benefits</a>
+          <Link to="/presentation" className="hover:text-neutral-900">Presentation</Link>
         </div>
         <Link
           to="/login"

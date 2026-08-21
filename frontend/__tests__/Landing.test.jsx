@@ -30,3 +30,12 @@ test('renders the benefits section', () => {
 
   expect(screen.getByRole('heading', { level: 2, name: /benefits/i })).toBeInTheDocument();
 });
+
+test('links to the hackathon presentation', () => {
+  renderLanding();
+
+  expect(screen.getAllByRole('link', { name: /presentation/i })[0]).toHaveAttribute(
+    'href',
+    '/presentation',
+  );
+});

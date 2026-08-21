@@ -11,6 +11,7 @@ import Purchase from './pages/customer/Purchase';
 import Dashboard from './pages/business/Dashboard';
 import Settings from './pages/business/Settings';
 import Transactions from './pages/business/Transactions';
+import Presentation from './pages/Presentation';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/presentation" element={<Presentation />} />
 
       <Route
         element={
