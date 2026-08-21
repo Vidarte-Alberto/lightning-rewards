@@ -22,7 +22,7 @@ function AppLayout() {
       <header className="border-b border-neutral-200 bg-white">
         <nav className="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
           <span className="font-semibold text-neutral-900">Lightning Rewards</span>
-          <div className="flex items-center gap-6 text-sm text-neutral-600">
+          <div className="flex items-center gap-3 sm:gap-6 text-sm text-neutral-600">
             {links.map((link) => (
               <NavLink
                 key={link.to}
@@ -32,6 +32,9 @@ function AppLayout() {
                 {link.label}
               </NavLink>
             ))}
+            <span className="hidden lg:inline text-neutral-400" title={user?.email}>
+              {user?.email}
+            </span>
             <button
               type="button"
               onClick={logout}

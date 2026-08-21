@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getBusinessByOwnerId, updateBusiness } from '../../lib/mockStore';
+import { findMockBusinessForUser, updateBusiness } from '../../lib/mockStore';
 import FormField from '../../components/FormField';
+import BackendDataPending from '../../components/BackendDataPending';
 
 function Settings() {
   const { user } = useAuth();
-  const business = getBusinessByOwnerId(user.id);
+  const business = findMockBusinessForUser(user);
 
-  const [stampsRequired, setStampsRequired] = useState(business.stampsRequired);
-  const [rewardDescription, setRewardDescription] = useState(business.rewardDescription);
-  const [nofferString, setNofferString] = useState(business.nofferString);
+  const [stampsRequired, setStampsRequired] = useState(business?.stampsRequired ?? 5);
+  const [rewardDescription, setRewardDescription] = useState(business?.rewardDescription ?? '');
+  const [nofferString, setNofferString] = useState(business?.nofferString ?? '');
   const [status, setStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!business) {
+    return <BackendDataPending title="Settings" />;
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();

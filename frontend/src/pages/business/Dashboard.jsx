@@ -1,11 +1,19 @@
 import { useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getBusinessByOwnerId, getBusinessCustomers } from '../../lib/mockStore';
+import { findMockBusinessForUser, getBusinessCustomers } from '../../lib/mockStore';
+import BackendDataPending from '../../components/BackendDataPending';
 
 function Dashboard() {
   const { user } = useAuth();
-  const business = useMemo(() => getBusinessByOwnerId(user.id), [user.id]);
-  const customers = useMemo(() => getBusinessCustomers(business.id), [business.id]);
+  const business = useMemo(() => findMockBusinessForUser(user), [user]);
+  const customers = useMemo(
+    () => (business ? getBusinessCustomers(business.id) : []),
+    [business],
+  );
+
+  if (!business) {
+    return <BackendDataPending title="Business dashboard" />;
+  }
 
   return (
     <div>

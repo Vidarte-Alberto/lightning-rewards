@@ -1,5 +1,4 @@
 const STORAGE_KEY = 'lightning-rewards-mock-store';
-const SESSION_KEY = 'lightning-rewards-mock-session';
 
 const FORCED_FAILURE_AMOUNT_SATS = 13;
 const DEBIT_MIN_DELAY_MS = 2000;
@@ -88,95 +87,6 @@ const toPublicUser = (user) => ({
   ndebitString: user.ndebitString,
 });
 
-export const getSession = () => {
-  try {
-    const raw = window.localStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-};
-
-const setSession = (user) => {
-  window.localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-};
-
-export const clearSession = () => {
-  window.localStorage.removeItem(SESSION_KEY);
-};
-
-export const register = async ({ role, email, password, name, category, nofferString, rewardDescription }) => {
-  const normalizedEmail = String(email || '').trim().toLowerCase();
-
-  if (!normalizedEmail || !password) {
-    throw new Error('Email and password are required');
-  }
-
-  if (state.users.some((user) => user.email === normalizedEmail)) {
-    throw new Error('Email is already registered');
-  }
-
-  const userId = generateId('user');
-  const user = { id: userId, email: normalizedEmail, password, role, ndebitString: null };
-  state.users.push(user);
-
-  if (role === 'BUSINESS') {
-    if (!name || !category || !nofferString || !rewardDescription) {
-      throw new Error('Business name, category, noffer, and reward description are required');
-    }
-
-    state.businesses.push({
-      id: generateId('business'),
-      ownerId: userId,
-      name,
-      category,
-      nofferString,
-      stampsRequired: 5,
-      rewardDescription,
-      logoUrl: null,
-      description: null,
-      isActive: true,
-    });
-  }
-
-  persist();
-  const publicUser = toPublicUser(user);
-  setSession(publicUser);
-  return publicUser;
-};
-
-export const login = async ({ email, password }) => {
-  const normalizedEmail = String(email || '').trim().toLowerCase();
-  const user = state.users.find((candidate) => candidate.email === normalizedEmail);
-
-  if (!user || user.password !== password) {
-    throw new Error('Invalid email or password');
-  }
-
-  const publicUser = toPublicUser(user);
-  setSession(publicUser);
-  return publicUser;
-};
-
-export const logout = () => {
-  clearSession();
-};
-
-export const connectWallet = async (userId, ndebitString) => {
-  const user = state.users.find((candidate) => candidate.id === userId);
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  user.ndebitString = ndebitString;
-  persist();
-
-  const publicUser = toPublicUser(user);
-  setSession(publicUser);
-  return publicUser;
-};
-
 const withMyProgress = (business, customerId) => {
   if (!customerId) return { ...business, myProgress: null };
 
@@ -207,6 +117,15 @@ export const getBusinessByOwnerId = (ownerId) => {
   const business = state.businesses.find((candidate) => candidate.ownerId === ownerId);
   if (!business) throw new Error('Business not found');
   return business;
+};
+
+export const findMockBusinessForUser = (user) => {
+  const mockOwner = state.users.find(
+    (candidate) => candidate.id === user.id || candidate.email === user.email,
+  );
+
+  if (!mockOwner) return null;
+  return state.businesses.find((candidate) => candidate.ownerId === mockOwner.id) ?? null;
 };
 
 export const updateBusiness = async (businessId, updates) => {
